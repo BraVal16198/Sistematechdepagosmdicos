@@ -65,10 +65,9 @@ export function HistorialClinico() {
   };
 
   const selectPaciente = (paciente: string) => {
-    if (paciente !== pacienteSeleccionado && draftDirty) {
-      if (!confirmDiscardDraft()) return;
-      clearDraftForm();
-    }
+    if (paciente === pacienteSeleccionado) return;
+    if (!confirmDiscardDraft()) return;
+    if (mostrarFormulario) clearDraftForm();
     setPacienteSeleccionado(paciente);
   };
 

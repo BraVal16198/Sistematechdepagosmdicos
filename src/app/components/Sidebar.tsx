@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   LayoutDashboard,
   UserPlus,
@@ -28,6 +28,7 @@ export function Sidebar({
   onClose,
 }: SidebarProps) {
   const [isDesktop, setIsDesktop] = useState(false);
+  const asideRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)');
@@ -39,6 +40,11 @@ export function Sidebar({
 
   // En móvil cerrado: fuera del tab order; en desktop siempre accesible
   const keyboardActive = isDesktop || open;
+
+  // React 18 no aplica el prop JSX `inert`; se fija en el DOM nativo
+  useEffect(() => {
+    asideRef.current?.toggleAttribute('inert', !keyboardActive);
+  }, [keyboardActive]);
 
   const getMenuItems = () => {
     if (userRole === 'administrador') {
@@ -82,13 +88,12 @@ export function Sidebar({
         />
       )}
       <aside
+        ref={asideRef}
         className={`w-64 bg-sidebar text-sidebar-foreground flex flex-col fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-200 ${
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         aria-label="Navegación principal"
         aria-hidden={!keyboardActive}
-        // @ts-expect-error React 18 types may omit inert
-        inert={!keyboardActive ? true : undefined}
       >
         <div className="p-6 border-b border-sidebar-border flex items-start justify-between gap-2">
           <div>

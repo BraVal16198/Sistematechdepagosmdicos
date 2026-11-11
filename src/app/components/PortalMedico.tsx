@@ -100,6 +100,8 @@ export function PortalMedico({
       resetDraft();
     }
 
+    const continuaMismoBorrador = draftDirty && draftPaciente === cita.paciente;
+
     setCitasHoy((prev) =>
       prev.map((c) =>
         c.id === cita.id
@@ -113,15 +115,16 @@ export function PortalMedico({
     setDraftPaciente(cita.paciente);
     setVistaActiva('historial');
     setMostrarFormulario(true);
-    setFormHistorial({ diagnostico: '', tratamiento: '', observaciones: '' });
+    if (!continuaMismoBorrador) {
+      setFormHistorial({ diagnostico: '', tratamiento: '', observaciones: '' });
+    }
     toast.message(`Atendiendo a ${cita.paciente}`);
   };
 
   const selectPaciente = (paciente: string) => {
-    if (paciente !== pacienteSeleccionado && draftDirty) {
-      if (!confirmDiscardDraft()) return;
-      resetDraft();
-    }
+    if (paciente === pacienteSeleccionado) return;
+    if (!confirmDiscardDraft()) return;
+    if (mostrarFormulario) resetDraft();
     setPacienteSeleccionado(paciente);
   };
 
