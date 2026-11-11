@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Calendar as CalendarIcon, Plus, Clock, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { HORAS_DISPONIBLES, MEDICOS, PACIENTES_DEMO, precioPorEspecialidad } from '../data/demo';
+import { formatDateOnly } from '../lib/dates';
 
 interface Cita {
   id: number;
@@ -248,7 +249,7 @@ export function GestionCitas() {
                 {citas.map((cita) => (
                   <tr key={cita.id} className="border-b border-border hover:bg-muted/50">
                     <td className="py-3 px-4 text-card-foreground">
-                      {new Date(cita.fecha).toLocaleDateString('es-ES')}
+                      {formatDateOnly(cita.fecha)}
                     </td>
                     <td className="py-3 px-4 text-card-foreground">
                       <div className="flex items-center gap-2">

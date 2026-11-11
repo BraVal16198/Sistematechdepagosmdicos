@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Calendar, FileText, Download, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadComprobantePago, downloadHistorialClinico } from '../lib/download';
+import { formatDateOnly } from '../lib/dates';
 
 interface CitaPaciente {
   id: number;
@@ -144,7 +145,7 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
     }
   };
 
-  const descargarPDFHistorial = () => {
+  const descargarHistorialTxt = () => {
     downloadHistorialClinico({
       paciente: nombrePaciente,
       consultas: historial.map((h) => ({
@@ -154,10 +155,10 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
         tratamiento: h.tratamiento,
       })),
     });
-    toast.success('Historial descargado');
+    toast.success('Historial TXT descargado');
   };
 
-  const descargarPDFPago = (cita: CitaPaciente) => {
+  const descargarComprobanteTxt = (cita: CitaPaciente) => {
     downloadComprobantePago({
       numero: `CITA-${cita.id}`,
       paciente: nombrePaciente,
@@ -166,7 +167,7 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
       metodoPago: cita.metodoPago,
       fecha: cita.fecha,
     });
-    toast.success('Comprobante descargado');
+    toast.success('Comprobante TXT descargado');
   };
 
   return (
@@ -242,7 +243,7 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-card-foreground">
                     <Calendar className="w-4 h-4" />
-                    {new Date(cita.fecha).toLocaleDateString('es-ES')}
+                    {formatDateOnly(cita.fecha)}
                   </div>
                   <div className="flex items-center gap-2 text-card-foreground">
                     <Clock className="w-4 h-4" />
@@ -258,11 +259,12 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
                 </div>
                 {cita.estado === 'completada' && (
                   <button
-                    onClick={() => descargarPDFPago(cita)}
+                    type="button"
+                    onClick={() => descargarComprobanteTxt(cita)}
                     className="mt-4 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
                   >
                     <Download className="w-4 h-4" />
-                    Descargar Comprobante
+                    Descargar comprobante (TXT)
                   </button>
                 )}
               </div>
@@ -276,11 +278,12 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
           <div className="flex justify-between items-center">
             <h3 className="text-lg text-card-foreground">Mi Historial Clínico</h3>
             <button
-              onClick={descargarPDFHistorial}
+              type="button"
+              onClick={descargarHistorialTxt}
               className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
             >
               <Download className="w-5 h-5" />
-              Descargar Historial PDF
+              Descargar historial (TXT)
             </button>
           </div>
 
@@ -295,7 +298,7 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
                     <div>
                       <p className="text-card-foreground">{consulta.medico}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(consulta.fecha).toLocaleDateString('es-ES')}
+                        {formatDateOnly(consulta.fecha)}
                       </p>
                     </div>
                   </div>
@@ -327,25 +330,26 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
                   <th className="text-left py-3 px-4 text-muted-foreground">Servicio</th>
                   <th className="text-left py-3 px-4 text-muted-foreground">Método</th>
                   <th className="text-left py-3 px-4 text-muted-foreground">Monto</th>
-                  <th className="text-left py-3 px-4 text-muted-foreground">PDF</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">TXT</th>
                 </tr>
               </thead>
               <tbody>
                 {misCitas.filter(c => c.estado === 'completada').map((cita) => (
                   <tr key={cita.id} className="border-b border-border">
                     <td className="py-3 px-4 text-card-foreground">
-                      {new Date(cita.fecha).toLocaleDateString('es-ES')}
+                      {formatDateOnly(cita.fecha)}
                     </td>
                     <td className="py-3 px-4 text-card-foreground">{cita.especialidad}</td>
                     <td className="py-3 px-4 text-card-foreground">{cita.metodoPago}</td>
                     <td className="py-3 px-4 text-card-foreground">S/ {cita.monto}</td>
                     <td className="py-3 px-4">
                       <button
-                        onClick={() => descargarPDFPago(cita)}
+                        type="button"
+                        onClick={() => descargarComprobanteTxt(cita)}
                         className="text-primary hover:underline flex items-center gap-1"
                       >
                         <Download className="w-4 h-4" />
-                        Descargar
+                        Descargar TXT
                       </button>
                     </td>
                   </tr>

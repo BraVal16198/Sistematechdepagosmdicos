@@ -33,8 +33,12 @@ Demo frontend profesional de gestión clínica: pacientes, citas, historial, pag
 
 ## Requisitos
 
-- Node.js 20+
-- pnpm (recomendado) o npm
+Par compatible (probado en este repo):
+
+- **Node.js 22.x** (soportado: `>=20.19.0 <23`, ver `engines` en `package.json`)
+- **pnpm 10.x** (`packageManager`: `pnpm@10.33.4`; rango `>=9 <11`)
+
+También puedes usar npm, pero pnpm es el gestor declarado.
 
 ## Instalación y ejecución
 

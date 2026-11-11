@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CreditCard, FileText, Download, DollarSign, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadComprobantePago } from '../lib/download';
+import { formatDateOnly, localYmd } from '../lib/dates';
 
 interface Factura {
   id: number;
@@ -14,10 +15,15 @@ interface Factura {
   metodoPago?: string;
 }
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
 export function PagosFacturacion() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [mostrarPago, setMostrarPago] = useState(false);
   const [facturaSeleccionada, setFacturaSeleccionada] = useState<Factura | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
   const [formData, setFormData] = useState({
     paciente: '',
     servicio: '',
@@ -82,13 +88,60 @@ export function PagosFacturacion() {
       paciente: formData.paciente,
       servicio: formData.servicio,
       monto: parseFloat(formData.monto),
-      fecha: new Date().toISOString().split('T')[0],
+      fecha: localYmd(),
       estado: 'pendiente'
     };
     setFacturas([...facturas, nuevaFactura]);
     setFormData({ paciente: '', servicio: '', monto: '', descripcion: '' });
     setMostrarFormulario(false);
   };
+
+  const cerrarPago = () => {
+    setMostrarPago(false);
+    setFacturaSeleccionada(null);
+  };
+
+  useEffect(() => {
+    if (!mostrarPago) return;
+
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusables = () =>
+      Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => !el.hasAttribute('disabled') && el.offsetParent !== null
+      );
+
+    const first = focusables()[0];
+    first?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cerrarPago();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const nodes = focusables();
+      if (nodes.length === 0) return;
+      const firstNode = nodes[0];
+      const lastNode = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === firstNode) {
+        e.preventDefault();
+        lastNode.focus();
+      } else if (!e.shiftKey && document.activeElement === lastNode) {
+        e.preventDefault();
+        firstNode.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previouslyFocused.current?.focus();
+    };
+  }, [mostrarPago]);
 
   const handleSubmitPago = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,18 +162,21 @@ export function PagosFacturacion() {
         fechaVencimiento: '',
         cvv: '',
       });
-      setMostrarPago(false);
-      setFacturaSeleccionada(null);
+      cerrarPago();
     }
   };
 
   const descargarFactura = (factura: Factura) => {
+    if (factura.estado !== 'pagada') {
+      toast.error('Solo se emite comprobante para facturas pagadas');
+      return;
+    }
     downloadComprobantePago({
       numero: factura.numero,
       paciente: factura.paciente,
       servicio: factura.servicio,
       monto: factura.monto,
-      metodoPago: factura.metodoPago ?? 'Pendiente',
+      metodoPago: factura.metodoPago ?? 'N/A',
       fecha: factura.fecha,
     });
     toast.success('Comprobante descargado');
@@ -272,6 +328,7 @@ export function PagosFacturacion() {
       {mostrarPago && facturaSeleccionada && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="presentation">
           <div
+            ref={dialogRef}
             className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-border"
             role="dialog"
             aria-modal="true"
@@ -359,10 +416,7 @@ export function PagosFacturacion() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setMostrarPago(false);
-                    setFacturaSeleccionada(null);
-                  }}
+                  onClick={cerrarPago}
                   className="px-6 py-3 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"
                 >
                   Cancelar
@@ -396,7 +450,7 @@ export function PagosFacturacion() {
                   <td className="py-3 px-4 text-card-foreground">{factura.servicio}</td>
                   <td className="py-3 px-4 text-card-foreground">S/ {factura.monto.toFixed(2)}</td>
                   <td className="py-3 px-4 text-card-foreground">
-                    {new Date(factura.fecha).toLocaleDateString('es-ES')}
+                    {formatDateOnly(factura.fecha)}
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-sm ${
@@ -411,6 +465,7 @@ export function PagosFacturacion() {
                     <div className="flex gap-2">
                       {factura.estado === 'pendiente' && (
                         <button
+                          type="button"
                           onClick={() => iniciarPago(factura)}
                           className="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                           title="Procesar Pago"
@@ -418,15 +473,17 @@ export function PagosFacturacion() {
                           <CreditCard className="w-4 h-4" />
                         </button>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => descargarFactura(factura)}
-                        className="p-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-                        title="Descargar"
-                        aria-label={`Descargar factura ${factura.numero}`}
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
+                      {factura.estado === 'pagada' && (
+                        <button
+                          type="button"
+                          onClick={() => descargarFactura(factura)}
+                          className="p-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+                          title="Descargar comprobante"
+                          aria-label={`Descargar comprobante ${factura.numero}`}
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

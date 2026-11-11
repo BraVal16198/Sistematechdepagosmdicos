@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Calendar, FileText, Clock, Plus, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatDateOnly, localYmd } from '../lib/dates';
 
 interface CitaMedico {
   id: number;
@@ -97,7 +98,7 @@ export function PortalMedico({
 
     const nueva: HistorialPaciente = {
       id: Date.now(),
-      fecha: new Date().toISOString().split('T')[0],
+      fecha: localYmd(),
       ...formHistorial,
     };
 
@@ -336,7 +337,7 @@ export function PortalMedico({
                           <FileText className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(consulta.fecha).toLocaleDateString('es-ES')}
+                              {formatDateOnly(consulta.fecha)}
                         </p>
                       </div>
                       <div className="space-y-2">

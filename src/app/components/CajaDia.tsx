@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Download, DollarSign, CreditCard, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadReporteCaja } from '../lib/download';
+import { localYmd } from '../lib/dates';
 
 interface PagoDelDia {
   id: number;
@@ -12,8 +13,18 @@ interface PagoDelDia {
   monto: number;
 }
 
+const CAJA_CERRADA_KEY = 'sistematech_caja_cerrada';
+
+function readCajaCerrada(): boolean {
+  try {
+    return sessionStorage.getItem(CAJA_CERRADA_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function CajaDia() {
-  const [cajaCerrada, setCajaCerrada] = useState(false);
+  const [cajaCerrada, setCajaCerrada] = useState(readCajaCerrada);
 
   const fechaHoy = new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -73,12 +84,17 @@ export function CajaDia() {
 
   const cerrarCaja = () => {
     setCajaCerrada(true);
+    try {
+      sessionStorage.setItem(CAJA_CERRADA_KEY, '1');
+    } catch {
+      /* ignore */
+    }
     toast.success(`Caja cerrada. Total del día: S/ ${totalGeneral.toFixed(2)}`);
   };
 
   const descargarReporte = () => {
     downloadReporteCaja({
-      fecha: new Date().toISOString().split('T')[0],
+      fecha: localYmd(),
       total: totalGeneral,
       filas: pagosDelDia,
     });

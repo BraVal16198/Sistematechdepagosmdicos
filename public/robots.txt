@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: /sitemap.xml
+Sitemap: https://braval16198.github.io/Sistematechdepagosmdicos/sitemap.xml

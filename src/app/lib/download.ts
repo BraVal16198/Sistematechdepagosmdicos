@@ -63,9 +63,10 @@ export function downloadReporteCaja(data: {
   const rows = data.filas
     .map((f) => `${f.hora},${f.paciente},${f.servicio},${f.metodoPago},${f.monto.toFixed(2)}`)
     .join('\n');
+  // 5 columnas: TOTAL en col1, monto en col5
   downloadTextFile(
     `caja-${data.fecha.replace(/\s+/g, '-')}.csv`,
-    `${header}\n${rows}\nTOTAL,,,${data.total.toFixed(2)}\n`,
+    `${header}\n${rows}\nTOTAL,,,,${data.total.toFixed(2)}\n`,
     'text/csv;charset=utf-8'
   );
 }

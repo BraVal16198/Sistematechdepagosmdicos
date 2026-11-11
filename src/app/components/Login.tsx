@@ -34,7 +34,7 @@ export function Login({ onLogin, onBack }: LoginProps) {
     }
 
     const session: SessionUser = {
-      username: user.displayName,
+      username: user.username,
       role: user.role,
       displayName: user.displayName,
       especialidad: user.especialidad,

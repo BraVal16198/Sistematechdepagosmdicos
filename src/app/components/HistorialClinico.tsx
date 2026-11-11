@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FileText, Search, Plus, Pill, Activity, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadHistorialClinico } from '../lib/download';
+import { formatDateOnly } from '../lib/dates';
 
 interface Consulta {
   id: number;
@@ -321,7 +322,7 @@ export function HistorialClinico() {
                     <div>
                       <p className="text-card-foreground">{consulta.medico}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(consulta.fecha).toLocaleDateString('es-ES')}
+                        {formatDateOnly(consulta.fecha)}
                       </p>
                     </div>
                   </div>
