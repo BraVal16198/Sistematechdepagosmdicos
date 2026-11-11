@@ -80,8 +80,8 @@ export default function App() {
         <header className="bg-card border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Portal del paciente</p>
-              <h1 className="text-lg text-card-foreground">{currentUser.username}</h1>
+              <h1 className="text-lg text-card-foreground">Portal del paciente</h1>
+              <p className="text-sm text-muted-foreground">{currentUser.username}</p>
             </div>
             <button
               type="button"
@@ -105,8 +105,8 @@ export default function App() {
         <header className="bg-card border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Portal médico</p>
-              <h1 className="text-lg text-card-foreground">{currentUser.username}</h1>
+              <h1 className="text-lg text-card-foreground">Portal médico</h1>
+              <p className="text-sm text-muted-foreground">{currentUser.username}</p>
             </div>
             <button
               type="button"
@@ -138,8 +138,10 @@ export default function App() {
         <header className="bg-card border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Bienvenido/a</p>
-              <h1 className="text-lg text-card-foreground">{currentUser.username}</h1>
+              <h1 className="text-lg text-card-foreground">Panel de gestión</h1>
+              <p className="text-sm text-muted-foreground">
+                Bienvenido/a, {currentUser.username}
+              </p>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Rol</p>

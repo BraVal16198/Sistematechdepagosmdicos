@@ -4,10 +4,7 @@ Demo de portafolio (SPA) para clínicas: roles, citas, historial clínico, factu
 
 **Demo en vivo:** [https://braval16198.github.io/Sistematechdepagosmdicos/](https://braval16198.github.io/Sistematechdepagosmdicos/)
 
-> Hosting: **GitHub Pages** (`gh-pages` / root, HTTPS).  
-> Alternativa Vercel: project `sistematech-pagos-medicos`, build `VITE_BASE=/ vite build`, output `dist` (requiere `VERCEL_TOKEN` o login).
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FBraVal16198%2FSistematechdepagosmdicos&project-name=sistematech-pagos-medicos&repository-name=Sistematechdepagosmdicos)
+Hosting activo: **GitHub Pages** (rama `gh-pages`, HTTPS). `vercel.json` queda solo como opción alternativa de hosting (cabeceras HTTP); Pages no aplica ese archivo.
 
 ## Stack
 
@@ -15,7 +12,7 @@ Demo de portafolio (SPA) para clínicas: roles, citas, historial clínico, factu
 - Vite 6
 - Tailwind CSS 4
 - Lucide React + Recharts
-- GitHub Pages (base `/Sistematechdepagosmdicos/`) + `vercel.json` opcional
+- GitHub Pages (base `/Sistematechdepagosmdicos/`)
 
 ## Requisitos
 
@@ -33,7 +30,7 @@ Otros scripts:
 
 ```bash
 npm run build      # build de producción → dist/ (base GitHub Pages por defecto)
-VITE_BASE=/ npm run build   # build para raíz (Vercel)
+VITE_BASE=/ npm run build   # build para raíz (p. ej. Vercel)
 npm run preview    # sirve dist/ en local
 npm run typecheck  # TypeScript sin emitir
 ```
@@ -41,16 +38,16 @@ npm run typecheck  # TypeScript sin emitir
 ## Estructura
 
 ```
-├── index.html              # SEO, OG/Twitter, lang=es
-├── public/                 # favicon, robots.txt, sitemap.xml, og-image
-├── vercel.json             # SPA rewrites + cabeceras de seguridad (Vercel)
-├── .github/workflows/      # Deploy a GitHub Pages (rama gh-pages)
+├── index.html                 # SEO, OG/Twitter, JSON-LD, H1 estático para crawlers
+├── public/                    # favicon, robots.txt, sitemap.xml, og-image, security.txt
+├── vercel.json                # Solo si despliega en Vercel (cabeceras + SPA rewrite)
+├── .github/workflows/         # Deploy a GitHub Pages (rama gh-pages)
 ├── src/
 │   ├── main.tsx
 │   ├── app/
-│   │   ├── App.tsx         # auth mock + vistas por rol
-│   │   ├── lib/            # roles demo, descarga de archivos
-│   │   └── components/     # pantallas de dominio (+ ui shadcn)
+│   │   ├── App.tsx            # auth mock + vistas por rol
+│   │   ├── lib/               # roles demo, descarga de archivos
+│   │   └── components/        # pantallas de dominio (+ ui shadcn)
 │   └── styles/
 └── package.json
 ```
@@ -75,6 +72,14 @@ Los formularios de tarjeta muestran de forma explícita **DEMO — sin pagos rea
 - Datos clínicos/financieros solo en memoria (se pierden al recargar)
 - Ideal para revisión de UI/UX y storytelling de producto frontend
 
+## SEO / AuditarWeb (GitHub Pages)
+
+- `index.html` incluye `lang=es`, title, description, canonical, OG/Twitter, JSON-LD (`WebApplication`), `<meta name="referrer">`, H1 y texto español visibles en el HTML estático (antes de React).
+- `public/robots.txt` y `public/sitemap.xml` viven en la raíz del *project site* (`…/Sistematechdepagosmdicos/`). AuditarWeb a veces pide `https://braval16198.github.io/robots.txt` (user site); eso exige un repo `BraVal16198.github.io` aparte — fuera de este proyecto.
+- **Cabeceras** `X-Frame-Options` / CSP `frame-ancestors`: GitHub Pages no permite `_headers` ni `vercel.json`. Mitigación parcial: `Referrer-Policy` vía meta. Para XFO real hace falta CDN (Cloudflare) o hosting con headers (Vercel/Netlify).
+- Subdominio gratis `*.github.io`: aviso de autoridad de dominio esperado (amarillo); requiere dominio propio de pago para mejorarlo.
+- `public/.well-known/security.txt` para contacto de seguridad.
+
 ## Roadmap (fuera de alcance de esta demo)
 
 - Backend (API + persistencia) y auth real
@@ -92,17 +97,12 @@ Los formularios de tarjeta muestran de forma explícita **DEMO — sin pagos rea
 
 ### Vercel (opcional)
 
+Si quiere cabeceras HTTP completas (`X-Frame-Options`, etc.):
+
 1. Importe el repositorio en Vercel.
-2. **Project Name:** `sistematech-pagos-medicos`
-3. **Build Command:** `VITE_BASE=/ vite build` (o `VITE_BASE=/ npm run build`)
-4. **Output Directory:** `dist`
-5. URL esperada: `https://sistematech-pagos-medicos.vercel.app`
-
-CLI (si tiene token):
-
-```bash
-VITE_BASE=/ npx vercel --token "$VERCEL_TOKEN" --yes --prod --name sistematech-pagos-medicos
-```
+2. **Build Command:** `VITE_BASE=/ vite build`
+3. **Output Directory:** `dist`
+4. `vercel.json` ya define rewrites SPA y cabeceras de seguridad.
 
 ## Licencia
 
