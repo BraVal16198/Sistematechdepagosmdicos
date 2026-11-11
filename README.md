@@ -74,10 +74,11 @@ Los formularios de tarjeta muestran de forma explícita **DEMO — sin pagos rea
 
 ## SEO / AuditarWeb (GitHub Pages)
 
-- `index.html` incluye `lang=es`, title, description, canonical, OG/Twitter, JSON-LD (`WebApplication`), `<meta name="referrer">`, H1 y texto español visibles en el HTML estático (antes de React).
-- `public/robots.txt` y `public/sitemap.xml` viven en la raíz del *project site* (`…/Sistematechdepagosmdicos/`). AuditarWeb a veces pide `https://braval16198.github.io/robots.txt` (user site); eso exige un repo `BraVal16198.github.io` aparte — fuera de este proyecto.
-- **Cabeceras** `X-Frame-Options` / CSP `frame-ancestors`: GitHub Pages no permite `_headers` ni `vercel.json`. Mitigación parcial: `Referrer-Policy` vía meta. Para XFO real hace falta CDN (Cloudflare) o hosting con headers (Vercel/Netlify).
-- Subdominio gratis `*.github.io`: aviso de autoridad de dominio esperado (amarillo); requiere dominio propio de pago para mejorarlo.
+- `index.html` incluye `lang=es`, title, description, canonical, OG/Twitter, JSON-LD (`WebApplication`), `<meta name="referrer" content="strict-origin-when-cross-origin">`, H1 **Pagos y Gestión Médica** y texto español estático (≥280 palabras) en `#seo-bootstrap` (antes de React), alineado con keywords del cuerpo.
+- CSP vía `<meta http-equiv="Content-Security-Policy">` (GitHub Pages no aplica `vercel.json` / `_headers`). Política: `default-src 'self'` + `script-src 'self'` + `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com` + `font-src` para DM Sans + `frame-ancestors 'none'`. **Nota:** `frame-ancestors` en meta lo ignoran los navegadores; sirve a auditores. Sin excepción de Google Fonts, la tipografía cae a system-ui.
+- **Cabeceras HTTP reales** (`X-Frame-Options`, `Referrer-Policy`, CSP completa): requieren Cloudflare delante de Pages o hosting Vercel/Netlify (`vercel.json` ya declara esas cabeceras). En Pages la mitigación es parcial (meta).
+- `public/robots.txt` y `public/sitemap.xml` viven en la raíz del *project site* (`…/Sistematechdepagosmdicos/`). AuditarWeb a veces pide `https://braval16198.github.io/robots.txt` (apex user site) → **404** hasta crear un repo `BraVal16198.github.io` (fuera de alcance). Tampoco hay dominio custom ni backlinks inventados; DA de `*.github.io` y redirects www quedan como residuales de plataforma.
+- Contraseñas demo (`admin`/`medico`/`paciente`) están etiquetadas DEMO a propósito; no hay secretos de producción en el cliente.
 - `public/.well-known/security.txt` para contacto de seguridad.
 
 ## Roadmap (fuera de alcance de esta demo)

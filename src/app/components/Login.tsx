@@ -119,15 +119,19 @@ export function Login({ onLogin }: LoginProps) {
             aria-labelledby="demo-accounts-title"
           >
             <h2 id="demo-accounts-title" className="text-sm font-medium text-card-foreground mb-2">
-              Cuentas demo
+              Cuentas DEMO (no son secretos)
             </h2>
             <ul className="space-y-1.5 text-sm text-muted-foreground">
               {DEMO_ACCOUNTS.map((account) => (
                 <li key={account.username}>
                   <span className="text-card-foreground font-medium">{account.username}</span>
                   {' / '}
-                  {account.password}
-                  <span className="block text-xs">{account.label}</span>
+                  <span aria-label={`Contraseña DEMO ${account.password}`}>
+                    {account.password}
+                  </span>
+                  <span className="block text-xs">
+                    DEMO — {account.label}
+                  </span>
                 </li>
               ))}
             </ul>
