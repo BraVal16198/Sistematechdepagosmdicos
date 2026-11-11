@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Save, UserPlus, Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Paciente {
   id: number;
@@ -67,6 +68,7 @@ export function RegistroPacientes() {
       ...formData
     };
     setPacientes([...pacientes, nuevoPaciente]);
+    toast.success('Paciente registrado');
     setFormData({
       dni: '',
       nombres: '',
@@ -77,7 +79,7 @@ export function RegistroPacientes() {
       email: '',
       direccion: '',
       grupoSanguineo: 'O+',
-      alergias: ''
+      alergias: '',
     });
     setMostrarFormulario(false);
   };

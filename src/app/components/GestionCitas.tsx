@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Calendar as CalendarIcon, Plus, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Clock, Check, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { HORAS_DISPONIBLES, MEDICOS, PACIENTES_DEMO, precioPorEspecialidad } from '../data/demo';
 
 interface Cita {
   id: number;
@@ -64,25 +66,15 @@ export function GestionCitas() {
     }
   ]);
 
-  const medicos = [
-    'Dr. García - Medicina General',
-    'Dr. Rodríguez - Cardiología',
-    'Dra. Martínez - Pediatría',
-    'Dr. Silva - Traumatología'
-  ];
-
-  const pacientes = [
-    'Juan Pérez',
-    'María López',
-    'Carlos Sánchez',
-    'Ana Torres'
-  ];
+  const medicos = [...MEDICOS];
+  const pacientes = [...PACIENTES_DEMO];
+  const horasDisponibles = [...HORAS_DISPONIBLES];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const medicoSeleccionado = medicos.find(m => m === formData.medico);
+    const medicoSeleccionado = medicos.find((m) => m === formData.medico);
     const especialidad = medicoSeleccionado?.split(' - ')[1] || 'General';
-    const montoCita = especialidad === 'Medicina General' ? 150 : 200;
+    const montoCita = precioPorEspecialidad(especialidad);
 
     const nuevaCita: Cita = {
       id: citas.length + 1,
@@ -94,24 +86,28 @@ export function GestionCitas() {
       motivo: formData.motivo,
       estado: 'programada',
       metodoPago: formData.metodoPago,
-      montoPagado: montoCita
+      montoPagado: montoCita,
     };
     setCitas([...citas, nuevaCita]);
+    toast.success('Cita programada');
     setFormData({
       paciente: '',
       medico: '',
       fecha: '',
       hora: '',
       motivo: '',
-      metodoPago: 'efectivo'
+      metodoPago: 'efectivo',
     });
     setMostrarFormulario(false);
   };
 
-  const horasDisponibles = [
-    '08:00', '09:00', '10:00', '11:00', '12:00',
-    '14:00', '15:00', '16:00', '17:00', '18:00'
-  ];
+  const actualizarEstado = (id: number, estado: Cita['estado']) => {
+    setCitas((prev) => prev.map((c) => (c.id === id ? { ...c, estado } : c)));
+    toast.success(estado === 'completada' ? 'Cita marcada como completada' : 'Cita cancelada');
+  };
+
+  const programadas = citas.filter((c) => c.estado === 'programada').length;
+  const completadas = citas.filter((c) => c.estado === 'completada').length;
 
   return (
     <div className="p-6 space-y-6">
@@ -263,13 +259,41 @@ export function GestionCitas() {
                     <td className="py-3 px-4 text-card-foreground">{cita.paciente}</td>
                     <td className="py-3 px-4 text-card-foreground">{cita.medico}</td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-sm ${
-                        cita.estado === 'programada' ? 'bg-blue-100 text-blue-800' :
-                        cita.estado === 'completada' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {cita.estado.charAt(0).toUpperCase() + cita.estado.slice(1)}
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`px-2 py-1 rounded text-sm ${
+                            cita.estado === 'programada'
+                              ? 'bg-blue-100 text-blue-800'
+                              : cita.estado === 'completada'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {cita.estado.charAt(0).toUpperCase() + cita.estado.slice(1)}
+                        </span>
+                        {cita.estado === 'programada' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => actualizarEstado(cita.id, 'completada')}
+                              className="p-1.5 rounded bg-green-600 text-white hover:bg-green-700"
+                              aria-label={`Completar cita de ${cita.paciente}`}
+                              title="Completar"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => actualizarEstado(cita.id, 'cancelada')}
+                              className="p-1.5 rounded bg-red-600 text-white hover:bg-red-700"
+                              aria-label={`Cancelar cita de ${cita.paciente}`}
+                              title="Cancelar"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -302,19 +326,19 @@ export function GestionCitas() {
           </div>
 
           <div className="bg-card rounded-lg shadow p-6 border border-border">
-            <h3 className="text-lg mb-4 text-card-foreground">Estadísticas del Día</h3>
+            <h3 className="text-lg mb-4 text-card-foreground">Estadísticas</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Total de citas</span>
-                <span className="text-xl text-card-foreground">8</span>
+                <span className="text-xl text-card-foreground">{citas.length}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Completadas</span>
-                <span className="text-xl text-green-600">5</span>
+                <span className="text-xl text-green-600">{completadas}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Pendientes</span>
-                <span className="text-xl text-blue-600">3</span>
+                <span className="text-muted-foreground">Programadas</span>
+                <span className="text-xl text-blue-600">{programadas}</span>
               </div>
             </div>
           </div>

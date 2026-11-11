@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { CreditCard, FileText, Download, DollarSign, Check } from 'lucide-react';
+import { toast } from 'sonner';
+import { downloadComprobantePago } from '../lib/download';
 
 interface Factura {
   id: number;
@@ -91,22 +93,37 @@ export function PagosFacturacion() {
   const handleSubmitPago = (e: React.FormEvent) => {
     e.preventDefault();
     if (facturaSeleccionada) {
-      const facturasActualizadas = facturas.map(f =>
+      const metodo =
+        pagoData.metodoPago === 'tarjeta' ? 'Tarjeta de Crédito' : 'Efectivo';
+      const facturasActualizadas = facturas.map((f) =>
         f.id === facturaSeleccionada.id
-          ? { ...f, estado: 'pagada' as const, metodoPago: pagoData.metodoPago === 'tarjeta' ? 'Tarjeta de Crédito' : 'Efectivo' }
+          ? { ...f, estado: 'pagada' as const, metodoPago: metodo }
           : f
       );
       setFacturas(facturasActualizadas);
+      toast.success(`Pago confirmado — ${facturaSeleccionada.numero}`);
       setPagoData({
         metodoPago: 'tarjeta',
         numeroTarjeta: '',
         nombreTitular: '',
         fechaVencimiento: '',
-        cvv: ''
+        cvv: '',
       });
       setMostrarPago(false);
       setFacturaSeleccionada(null);
     }
+  };
+
+  const descargarFactura = (factura: Factura) => {
+    downloadComprobantePago({
+      numero: factura.numero,
+      paciente: factura.paciente,
+      servicio: factura.servicio,
+      monto: factura.monto,
+      metodoPago: factura.metodoPago ?? 'Pendiente',
+      fecha: factura.fecha,
+    });
+    toast.success('Comprobante descargado');
   };
 
   const iniciarPago = (factura: Factura) => {
@@ -253,9 +270,14 @@ export function PagosFacturacion() {
       )}
 
       {mostrarPago && facturaSeleccionada && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-border">
-            <h3 className="text-lg mb-4 text-card-foreground">Procesar Pago</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="presentation">
+          <div
+            className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-border"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pago-titulo"
+          >
+            <h3 id="pago-titulo" className="text-lg mb-4 text-card-foreground">Procesar pago</h3>
             <div className="mb-4 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">Factura: {facturaSeleccionada.numero}</p>
               <p className="text-sm text-muted-foreground">Paciente: {facturaSeleccionada.paciente}</p>
@@ -397,8 +419,11 @@ export function PagosFacturacion() {
                         </button>
                       )}
                       <button
+                        type="button"
+                        onClick={() => descargarFactura(factura)}
                         className="p-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
                         title="Descargar"
+                        aria-label={`Descargar factura ${factura.numero}`}
                       >
                         <Download className="w-4 h-4" />
                       </button>

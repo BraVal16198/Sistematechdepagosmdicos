@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Calendar, FileText, CreditCard, Download, Clock } from 'lucide-react';
+import { Calendar, FileText, Download, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { downloadComprobantePago, downloadHistorialClinico } from '../lib/download';
 
 interface CitaPaciente {
   id: number;
@@ -122,6 +124,7 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
     e.preventDefault();
     if (citaSeleccionada) {
       setMisCitas([...misCitas, { ...citaSeleccionada, estado: 'confirmada' }]);
+      toast.success('Cita confirmada y pago registrado');
       setMostrarPago(false);
       setMostrarAgendarCita(false);
       setCitaSeleccionada(null);
@@ -130,23 +133,40 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
         fecha: '',
         hora: '',
         motivo: '',
-        metodoPago: 'tarjeta'
+        metodoPago: 'tarjeta',
       });
       setPagoData({
         numeroTarjeta: '',
         nombreTitular: '',
         fechaVencimiento: '',
-        cvv: ''
+        cvv: '',
       });
     }
   };
 
   const descargarPDFHistorial = () => {
-    alert('Descargando PDF de Historial Clínico...');
+    downloadHistorialClinico({
+      paciente: nombrePaciente,
+      consultas: historial.map((h) => ({
+        fecha: h.fecha,
+        medico: h.medico,
+        diagnostico: h.diagnostico,
+        tratamiento: h.tratamiento,
+      })),
+    });
+    toast.success('Historial descargado');
   };
 
   const descargarPDFPago = (cita: CitaPaciente) => {
-    alert(`Descargando comprobante de pago - Cita ID: ${cita.id}`);
+    downloadComprobantePago({
+      numero: `CITA-${cita.id}`,
+      paciente: nombrePaciente,
+      servicio: cita.especialidad,
+      monto: cita.monto,
+      metodoPago: cita.metodoPago,
+      fecha: cita.fecha,
+    });
+    toast.success('Comprobante descargado');
   };
 
   return (

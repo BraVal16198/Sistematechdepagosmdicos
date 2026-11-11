@@ -1,16 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Tech de Pagos Médicos | Gestión clínica y facturación</title>
+    <meta
+      name="description"
+      content="Sistema Tech: plataforma demo para clínicas. Gestiona pacientes, citas, historial clínico, pagos y facturación con portales para administración, médicos y pacientes."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Brayan Vallejo" />
+    <meta name="theme-color" content="#0c4a6e" />
+    <link rel="canonical" href="/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Sistema Tech de Pagos Médicos</title>
-      <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
-    </head>
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_PE" />
+    <meta property="og:title" content="Sistema Tech de Pagos Médicos" />
+    <meta
+      property="og:description"
+      content="Gestión de pacientes, citas, historial clínico y cobros médicos en una sola plataforma demo."
+    />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta property="og:url" content="/" />
+    <meta property="og:site_name" content="Sistema Tech" />
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sistema Tech de Pagos Médicos" />
+    <meta
+      name="twitter:description"
+      content="Demo profesional de pagos y gestión médica: citas, historial y facturación."
+    />
+    <meta name="twitter:image" content="/og-image.svg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Sistema Tech de Pagos Médicos",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Plataforma demo para gestionar pacientes, citas, historial clínico y facturación médica.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "PEN"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Brayan Vallejo"
+        },
+        "inLanguage": "es"
+      }
+    </script>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      #root {
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

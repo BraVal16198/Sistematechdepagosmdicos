@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { Download, DollarSign, CreditCard, Wallet } from 'lucide-react';
+import { toast } from 'sonner';
+import { downloadReporteCaja } from '../lib/download';
 
 interface PagoDelDia {
   id: number;
@@ -10,11 +13,13 @@ interface PagoDelDia {
 }
 
 export function CajaDia() {
+  const [cajaCerrada, setCajaCerrada] = useState(false);
+
   const fechaHoy = new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 
   const pagosDelDia: PagoDelDia[] = [
@@ -67,11 +72,17 @@ export function CajaDia() {
   const totalGeneral = totalEfectivo + totalTarjeta + totalBilletera;
 
   const cerrarCaja = () => {
-    alert(`Caja cerrada. Total del día: S/ ${totalGeneral.toFixed(2)}`);
+    setCajaCerrada(true);
+    toast.success(`Caja cerrada. Total del día: S/ ${totalGeneral.toFixed(2)}`);
   };
 
   const descargarReporte = () => {
-    alert('Descargando reporte de caja del día...');
+    downloadReporteCaja({
+      fecha: new Date().toISOString().split('T')[0],
+      total: totalGeneral,
+      filas: pagosDelDia,
+    });
+    toast.success('Reporte de caja descargado (CSV)');
   };
 
   return (
@@ -90,10 +101,12 @@ export function CajaDia() {
             Descargar Reporte
           </button>
           <button
+            type="button"
             onClick={cerrarCaja}
-            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            disabled={cajaCerrada}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-60"
           >
-            Cerrar Caja
+            {cajaCerrada ? 'Caja cerrada' : 'Cerrar caja'}
           </button>
         </div>
       </div>
