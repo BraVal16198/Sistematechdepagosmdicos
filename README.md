@@ -2,9 +2,10 @@
 
 Demo de portafolio (SPA) para clínicas: roles, citas, historial clínico, facturación y caja del día. **Todo el estado es mock en el navegador**; no hay backend, pasarela de pagos ni cumplimiento PCI/HIPAA.
 
-**Demo en vivo:** [https://braval16198.github.io/Sistematechdepagosmdicos/](https://braval16198.github.io/Sistematechdepagosmdicos/)
+**URL durable (GitHub Pages):** [https://braval16198.github.io/Sistematechdepagosmdicos/](https://braval16198.github.io/Sistematechdepagosmdicos/)
 
-> Despliegue actual: **GitHub Pages**. Alternativa Vercel: project name `sistematech-pagos-medicos`, build `vite build` con `VITE_BASE=/`, output `dist`.
+> La rama `gh-pages` ya tiene el build. Si la URL da 404, el owner debe activar **Settings → Pages → Deploy from branch → `gh-pages` / (root)** (la API del agente no puede habilitar Pages: 403).  
+> Alternativa Vercel: project `sistematech-pagos-medicos`, build `VITE_BASE=/ vite build`, output `dist` (requiere `VERCEL_TOKEN` o login).
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FBraVal16198%2FSistematechdepagosmdicos&project-name=sistematech-pagos-medicos&repository-name=Sistematechdepagosmdicos)
 
