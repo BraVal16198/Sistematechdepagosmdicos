@@ -120,8 +120,9 @@
         clínicas y centros de atención ambulatoria. El foco del producto es
         <strong>Pagos y Gestión Médica</strong>: unificar en una sola interfaz la
         operación diaria de citas, el historial clínico básico, la facturación y el
-        seguimiento de pagos con datos simulados. Este sitio publica una demo frontend
-        para revisión de talento; no es un servicio clínico en producción.
+        seguimiento de pagos con datos simulados. La demo corre completa en el
+        navegador: inicie sesión con una cuenta DEMO y explore; no hace falta clonar
+        código ni usar GitHub para probarla. No es un servicio clínico en producción.
       </p>
 
       <p>
@@ -159,8 +160,8 @@
           <li><a href="#aviso-demo">Aviso de privacidad (demo)</a></li>
           <li>
             <a
-              href="https://github.com/BraVal16198/Sistematechdepagosmdicos/blob/main/README.md"
-              >Documentación del proyecto (README)</a
+              href="https://github.com/BraVal16198/Sistematechdepagosmdicos"
+              >Ver código fuente (opcional)</a
             >
           </li>
           <li><a href="./robots.txt">robots.txt</a></li>
@@ -196,23 +197,21 @@
       <section id="aviso-demo">
         <h2>Aviso de privacidad (demo)</h2>
         <p>
-          Esta aplicación es solo demostrativa: los datos no se envían a un backend ni a
-          una pasarela de pagos. No use información personal real ni datos de tarjetas
-          verdaderos. La facturación, el historial y las citas que ve en pantalla son
-          ejemplos inventados para clínicas de demostración. Si necesita un despliegue
-          con cabeceras HTTP estrictas (X-Frame-Options, CSP completa, Referrer-Policy
-          por header), use Cloudflare delante de GitHub Pages o un host como Vercel;
-          en Pages la mitigación es parcial vía meta tags.
+          Esta aplicación es solo demostrativa y funciona en el navegador: los datos no
+          se envían a un backend ni a una pasarela de pagos. No use información personal
+          real ni datos de tarjetas verdaderos. La facturación, el historial y las citas
+          que ve en pantalla son ejemplos inventados para clínicas de demostración. La
+          protección del visitante se refuerza con políticas en la propia página (referrer
+          y CSP vía meta); no se requiere cuenta ni repositorio para usar la demo.
         </p>
       </section>
     </div>
 
     <noscript>
       <p style="max-width: 42rem; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif">
-        Active JavaScript para usar la demo interactiva de Sistema Tech. El contenido
-        estático de Pagos y Gestión Médica (citas, historial, facturación y clínicas)
-        está disponible arriba y en el README del repositorio. Cuentas DEMO públicas;
-        sin cobros reales.
+        Active JavaScript para usar la demo interactiva de Sistema Tech en el navegador.
+        El resumen estático de Pagos y Gestión Médica (citas, historial, facturación y
+        clínicas) está disponible arriba. Cuentas DEMO públicas; sin cobros reales.
       </p>
     </noscript>
 
