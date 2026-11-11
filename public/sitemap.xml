@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Plantilla: el build de Vite regenera este archivo con VITE_SITE_URL. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://braval16198.github.io/Sistematechdepagosmdicos/</loc>
+    <loc>%VITE_SITE_URL%/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

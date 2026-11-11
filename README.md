@@ -64,11 +64,13 @@ pnpm typecheck
 
 Copia `.env.example` a `.env` si necesitas personalizar:
 
-| Variable | Descripción | Default |
+| Variable | Descripción | Default / notas |
 | --- | --- | --- |
-| `VITE_SITE_URL` | URL pública (SEO / OG absolutos en deploy) | — |
+| `VITE_DEPLOY_TARGET` | `github-pages` \| `vercel` \| `netlify` \| `other` | Detecta `VERCEL`/`NETLIFY` o `github.io` en la URL |
+| `VITE_SITE_URL` | Origen público (canonical, OG, robots, sitemap) | Obligatorio en build **vercel/netlify**; en GitHub Pages usa el default `github.io` del repo |
+| `VITE_BASE_PATH` | Override del `base` de Vite | Auto: `/Sistematechdepagosmdicos/` (GH Pages) o `/` |
 | `VITE_APP_NAME` | Nombre visible del producto | Sistema Tech… |
-| `VITE_DEMO_MODE` | Modo demo local | `true` |
+| `VITE_DEMO_MODE` | Auth demo local | `true` |
 
 No se requieren secretos de API para correr el demo.
 
@@ -99,10 +101,27 @@ No se requieren secretos de API para correr el demo.
 
 ## Despliegue
 
-1. Conecta el repo a **Vercel** o **Netlify**
-2. Build command: `pnpm build` — output: `dist`
-3. Define `VITE_SITE_URL` con tu dominio (recomendado para OG/sitemap absolutos)
-4. HTTPS y HSTS los aporta el hosting; las cabeceras de seguridad van en `vercel.json` / `netlify.toml` / `public/_headers`
+### GitHub Pages (proyecto)
+
+```bash
+VITE_DEPLOY_TARGET=github-pages pnpm build
+```
+
+- `base` = `/Sistematechdepagosmdicos/`
+- Si no defines `VITE_SITE_URL`, se usa `https://braval16198.github.io/Sistematechdepagosmdicos`
+- El build regenera `robots.txt` y `sitemap.xml` con ese origen
+
+### Vercel / Netlify (raíz)
+
+```bash
+VITE_DEPLOY_TARGET=vercel VITE_SITE_URL=https://tu-dominio.com pnpm build
+```
+
+- `base` = `/`
+- **`VITE_SITE_URL` es obligatorio** en el build (si falta, el build falla a propósito para no publicar canonical/OG apuntando a github.io)
+- Misma regla para Netlify (`VITE_DEPLOY_TARGET=netlify`)
+
+Build command: `pnpm build` — output: `dist`. HTTPS/HSTS los aporta el hosting; cabeceras en `vercel.json` / `netlify.toml` / `public/_headers`.
 
 ## Criterios tipo auditarweb.co
 

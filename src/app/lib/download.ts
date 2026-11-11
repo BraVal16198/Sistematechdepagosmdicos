@@ -12,6 +12,18 @@ export function downloadTextFile(filename: string, content: string, mime = 'text
   URL.revokeObjectURL(url);
 }
 
+/** Escapa campos CSV y neutraliza prefijos de fórmula (=,+,-,@). */
+export function csvEscape(value: string | number): string {
+  let text = String(value);
+  if (/^[=+\-@]/.test(text)) {
+    text = `'${text}`;
+  }
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
 export function downloadComprobantePago(data: {
   numero?: string;
   paciente: string;
@@ -61,12 +73,20 @@ export function downloadReporteCaja(data: {
 }) {
   const header = 'hora,paciente,servicio,metodo,monto';
   const rows = data.filas
-    .map((f) => `${f.hora},${f.paciente},${f.servicio},${f.metodoPago},${f.monto.toFixed(2)}`)
+    .map((f) =>
+      [
+        csvEscape(f.hora),
+        csvEscape(f.paciente),
+        csvEscape(f.servicio),
+        csvEscape(f.metodoPago),
+        csvEscape(f.monto.toFixed(2)),
+      ].join(',')
+    )
     .join('\n');
   // 5 columnas: TOTAL en col1, monto en col5
   downloadTextFile(
     `caja-${data.fecha.replace(/\s+/g, '-')}.csv`,
-    `${header}\n${rows}\nTOTAL,,,,${data.total.toFixed(2)}\n`,
+    `${header}\n${rows}\n${csvEscape('TOTAL')},,,,${csvEscape(data.total.toFixed(2))}\n`,
     'text/csv;charset=utf-8'
   );
 }

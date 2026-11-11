@@ -1,4 +1,5 @@
+# Plantilla: el build de Vite regenera este archivo con VITE_SITE_URL.
 User-agent: *
 Allow: /
 
-Sitemap: https://braval16198.github.io/Sistematechdepagosmdicos/sitemap.xml
+Sitemap: %VITE_SITE_URL%/sitemap.xml
