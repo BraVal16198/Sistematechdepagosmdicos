@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Download, DollarSign, CreditCard, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadReporteCaja } from '../lib/download';
@@ -13,18 +13,38 @@ interface PagoDelDia {
   monto: number;
 }
 
-const CAJA_CERRADA_KEY = 'sistematech_caja_cerrada';
+const CAJA_CERRADA_PREFIX = 'sistematech_caja_cerrada:';
 
-function readCajaCerrada(): boolean {
+function cajaKey(day = localYmd()) {
+  return `${CAJA_CERRADA_PREFIX}${day}`;
+}
+
+function readCajaCerrada(day = localYmd()): boolean {
   try {
-    return sessionStorage.getItem(CAJA_CERRADA_KEY) === '1';
+    return sessionStorage.getItem(cajaKey(day)) === '1';
   } catch {
     return false;
   }
 }
 
 export function CajaDia() {
-  const [cajaCerrada, setCajaCerrada] = useState(readCajaCerrada);
+  const [dia, setDia] = useState(localYmd);
+  const [cajaCerrada, setCajaCerrada] = useState(() => readCajaCerrada(dia));
+
+  useEffect(() => {
+    const syncDay = () => {
+      const today = localYmd();
+      setDia(today);
+      setCajaCerrada(readCajaCerrada(today));
+    };
+    syncDay();
+    const id = window.setInterval(syncDay, 60_000);
+    window.addEventListener('focus', syncDay);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener('focus', syncDay);
+    };
+  }, []);
 
   const fechaHoy = new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -83,9 +103,11 @@ export function CajaDia() {
   const totalGeneral = totalEfectivo + totalTarjeta + totalBilletera;
 
   const cerrarCaja = () => {
+    const today = localYmd();
+    setDia(today);
     setCajaCerrada(true);
     try {
-      sessionStorage.setItem(CAJA_CERRADA_KEY, '1');
+      sessionStorage.setItem(cajaKey(today), '1');
     } catch {
       /* ignore */
     }
@@ -94,7 +116,7 @@ export function CajaDia() {
 
   const descargarReporte = () => {
     downloadReporteCaja({
-      fecha: localYmd(),
+      fecha: dia,
       total: totalGeneral,
       filas: pagosDelDia,
     });

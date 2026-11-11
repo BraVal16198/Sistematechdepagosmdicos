@@ -29,12 +29,30 @@ export function PortalMedico({
   const [vistaActiva, setVistaActiva] = useState('agenda');
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [draftPaciente, setDraftPaciente] = useState('');
 
   const [formHistorial, setFormHistorial] = useState({
     diagnostico: '',
     tratamiento: '',
     observaciones: '',
   });
+
+  const draftDirty =
+    mostrarFormulario &&
+    Boolean(formHistorial.diagnostico || formHistorial.tratamiento || formHistorial.observaciones);
+
+  const resetDraft = () => {
+    setFormHistorial({ diagnostico: '', tratamiento: '', observaciones: '' });
+    setMostrarFormulario(false);
+    setDraftPaciente('');
+  };
+
+  const confirmDiscardDraft = () => {
+    if (!draftDirty) return true;
+    return window.confirm(
+      'Hay una consulta en borrador. ¿Descartarla para cambiar de paciente?'
+    );
+  };
 
   const [citasHoy, setCitasHoy] = useState<CitaMedico[]>([
     {
@@ -77,6 +95,11 @@ export function PortalMedico({
   });
 
   const atenderPaciente = (cita: CitaMedico) => {
+    if (draftDirty && draftPaciente && draftPaciente !== cita.paciente) {
+      if (!confirmDiscardDraft()) return;
+      resetDraft();
+    }
+
     setCitasHoy((prev) =>
       prev.map((c) =>
         c.id === cita.id
@@ -87,14 +110,38 @@ export function PortalMedico({
       )
     );
     setPacienteSeleccionado(cita.paciente);
+    setDraftPaciente(cita.paciente);
     setVistaActiva('historial');
     setMostrarFormulario(true);
+    setFormHistorial({ diagnostico: '', tratamiento: '', observaciones: '' });
     toast.message(`Atendiendo a ${cita.paciente}`);
+  };
+
+  const selectPaciente = (paciente: string) => {
+    if (paciente !== pacienteSeleccionado && draftDirty) {
+      if (!confirmDiscardDraft()) return;
+      resetDraft();
+    }
+    setPacienteSeleccionado(paciente);
+  };
+
+  const abrirNuevaConsulta = () => {
+    if (!pacienteSeleccionado) return;
+    if (mostrarFormulario && draftDirty && draftPaciente !== pacienteSeleccionado) {
+      if (!confirmDiscardDraft()) return;
+    }
+    setDraftPaciente(pacienteSeleccionado);
+    setMostrarFormulario(true);
   };
 
   const handleSubmitHistorial = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pacienteSeleccionado) return;
+    const pacienteObjetivo = draftPaciente || pacienteSeleccionado;
+    if (!pacienteObjetivo) return;
+    if (pacienteSeleccionado !== pacienteObjetivo) {
+      toast.error('El borrador pertenece a otro paciente. Cámbielo o descarte el borrador.');
+      return;
+    }
 
     const nueva: HistorialPaciente = {
       id: Date.now(),
@@ -104,20 +151,19 @@ export function PortalMedico({
 
     setHistoriales((prev) => ({
       ...prev,
-      [pacienteSeleccionado]: [nueva, ...(prev[pacienteSeleccionado] ?? [])],
+      [pacienteObjetivo]: [nueva, ...(prev[pacienteObjetivo] ?? [])],
     }));
 
     setCitasHoy((prev) =>
       prev.map((c) =>
-        c.paciente === pacienteSeleccionado && c.estado === 'en-atencion'
+        c.paciente === pacienteObjetivo && c.estado === 'en-atencion'
           ? { ...c, estado: 'atendida' }
           : c
       )
     );
 
     toast.success('Historial clínico guardado');
-    setFormHistorial({ diagnostico: '', tratamiento: '', observaciones: '' });
-    setMostrarFormulario(false);
+    resetDraft();
   };
 
   const estadoLabel = (estado: CitaMedico['estado']) => {
@@ -234,7 +280,7 @@ export function PortalMedico({
               <select
                 id="medico-paciente"
                 value={pacienteSeleccionado}
-                onChange={(e) => setPacienteSeleccionado(e.target.value)}
+                onChange={(e) => selectPaciente(e.target.value)}
                 className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Seleccione un paciente...</option>
@@ -254,11 +300,13 @@ export function PortalMedico({
                   </h3>
                   <button
                     type="button"
-                    onClick={() => setMostrarFormulario(!mostrarFormulario)}
+                    onClick={() =>
+                      mostrarFormulario ? resetDraft() : abrirNuevaConsulta()
+                    }
                     className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
                   >
                     <Plus className="w-5 h-5" aria-hidden="true" />
-                    Nueva consulta
+                    {mostrarFormulario ? 'Cerrar formulario' : 'Nueva consulta'}
                   </button>
                 </div>
 
@@ -319,7 +367,7 @@ export function PortalMedico({
                         </button>
                         <button
                           type="button"
-                          onClick={() => setMostrarFormulario(false)}
+                          onClick={resetDraft}
                           className="px-6 py-2 bg-card text-muted-foreground border border-border rounded-lg hover:bg-muted/80 transition-colors"
                         >
                           Cancelar

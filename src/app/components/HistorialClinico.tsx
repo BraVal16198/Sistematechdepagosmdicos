@@ -24,6 +24,7 @@ interface HistorialPaciente {
 export function HistorialClinico() {
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState('');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [draftPaciente, setDraftPaciente] = useState('');
   const [formData, setFormData] = useState({
     fecha: '',
     medico: '',
@@ -33,6 +34,49 @@ export function HistorialClinico() {
   });
 
   const pacientes = ['Juan Pérez', 'María López', 'Carlos Sánchez'];
+
+  const draftDirty =
+    mostrarFormulario &&
+    Boolean(
+      formData.fecha ||
+        formData.medico ||
+        formData.diagnostico ||
+        formData.tratamiento ||
+        formData.observaciones
+    );
+
+  const clearDraftForm = () => {
+    setFormData({
+      fecha: '',
+      medico: '',
+      diagnostico: '',
+      tratamiento: '',
+      observaciones: '',
+    });
+    setMostrarFormulario(false);
+    setDraftPaciente('');
+  };
+
+  const confirmDiscardDraft = () => {
+    if (!draftDirty) return true;
+    return window.confirm(
+      'Hay una consulta en borrador. ¿Descartarla para cambiar de paciente?'
+    );
+  };
+
+  const selectPaciente = (paciente: string) => {
+    if (paciente !== pacienteSeleccionado && draftDirty) {
+      if (!confirmDiscardDraft()) return;
+      clearDraftForm();
+    }
+    setPacienteSeleccionado(paciente);
+  };
+
+  const abrirNuevaConsulta = () => {
+    if (!pacienteSeleccionado) return;
+    setDraftPaciente(pacienteSeleccionado);
+    setMostrarFormulario(true);
+  };
 
   const [historiales, setHistoriales] = useState<Record<string, HistorialPaciente>>({
     'Juan Pérez': {
@@ -86,17 +130,22 @@ export function HistorialClinico() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pacienteSeleccionado) return;
+    const pacienteObjetivo = draftPaciente || pacienteSeleccionado;
+    if (!pacienteObjetivo) return;
+    if (pacienteSeleccionado !== pacienteObjetivo) {
+      toast.error('El borrador pertenece a otro paciente. Cámbielo o descarte el borrador.');
+      return;
+    }
 
     setHistoriales((prev) => {
-      const actual = prev[pacienteSeleccionado];
+      const actual = prev[pacienteObjetivo];
       const nueva: Consulta = {
         id: (actual?.consultas.length ?? 0) + 1,
         ...formData,
       };
       return {
         ...prev,
-        [pacienteSeleccionado]: {
+        [pacienteObjetivo]: {
           ...actual,
           consultas: [nueva, ...(actual?.consultas ?? [])],
         },
@@ -104,14 +153,7 @@ export function HistorialClinico() {
     });
 
     toast.success('Consulta guardada en el historial');
-    setFormData({
-      fecha: '',
-      medico: '',
-      diagnostico: '',
-      tratamiento: '',
-      observaciones: '',
-    });
-    setMostrarFormulario(false);
+    clearDraftForm();
   };
 
   const historialActual = pacienteSeleccionado ? historiales[pacienteSeleccionado] : null;
@@ -162,7 +204,7 @@ export function HistorialClinico() {
             <select
               id="historial-paciente"
               value={pacienteSeleccionado}
-              onChange={(e) => setPacienteSeleccionado(e.target.value)}
+              onChange={(e) => selectPaciente(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">Seleccione un paciente...</option>
@@ -212,11 +254,13 @@ export function HistorialClinico() {
               <h3 className="text-lg text-card-foreground">Consultas médicas</h3>
               <button
                 type="button"
-                onClick={() => setMostrarFormulario(!mostrarFormulario)}
+                onClick={() =>
+                  mostrarFormulario ? clearDraftForm() : abrirNuevaConsulta()
+                }
                 className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
               >
                 <Plus className="w-5 h-5" aria-hidden="true" />
-                Nueva consulta
+                {mostrarFormulario ? 'Cerrar formulario' : 'Nueva consulta'}
               </button>
             </div>
 
@@ -296,7 +340,7 @@ export function HistorialClinico() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setMostrarFormulario(false)}
+                      onClick={clearDraftForm}
                       className="px-6 py-2 bg-card text-muted-foreground border border-border rounded-lg hover:bg-muted/80 transition-colors"
                     >
                       Cancelar

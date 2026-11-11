@@ -27,10 +27,39 @@ function resolveDeployTarget(env: Record<string, string>): DeployTarget {
   return 'other'
 }
 
-function resolveSiteUrl(env: Record<string, string>, target: DeployTarget, isBuild: boolean): string {
+function resolveBase(target: DeployTarget, env: Record<string, string>): string {
+  if (env.VITE_BASE_PATH) {
+    const b = env.VITE_BASE_PATH
+    return b.endsWith('/') ? b : `${b}/`
+  }
+  return target === 'github-pages' ? GH_PAGES_BASE : '/'
+}
+
+/** Une origen + base de assets sin duplicar el path del proyecto. */
+function joinSiteUrlWithBase(siteUrl: string, base: string): string {
+  const cleaned = siteUrl.replace(/\/$/, '')
+  const basePath = base === '/' ? '' : base.replace(/\/$/, '')
+  if (!basePath) return cleaned
+  try {
+    const u = new URL(cleaned)
+    const path = (u.pathname || '/').replace(/\/$/, '') || ''
+    if (path === basePath || path.startsWith(`${basePath}/`)) return cleaned
+    if (path === '' || path === '/') return `${u.origin}${basePath}`
+    return cleaned
+  } catch {
+    return cleaned
+  }
+}
+
+function resolveSiteUrl(
+  env: Record<string, string>,
+  target: DeployTarget,
+  base: string,
+  isBuild: boolean
+): string {
   const configured = (env.VITE_SITE_URL || '').replace(/\/$/, '')
 
-  if (configured) return configured
+  if (configured) return joinSiteUrlWithBase(configured, base)
 
   if (target === 'github-pages') return GH_PAGES_SITE_URL
 
@@ -42,15 +71,7 @@ function resolveSiteUrl(env: Record<string, string>, target: DeployTarget, isBui
   }
 
   // Dev local / preview sin target cloud
-  return GH_PAGES_SITE_URL
-}
-
-function resolveBase(target: DeployTarget, env: Record<string, string>): string {
-  if (env.VITE_BASE_PATH) {
-    const b = env.VITE_BASE_PATH
-    return b.endsWith('/') ? b : `${b}/`
-  }
-  return target === 'github-pages' ? GH_PAGES_BASE : '/'
+  return joinSiteUrlWithBase(GH_PAGES_SITE_URL, base)
 }
 
 function figmaAssetResolver(): Plugin {
@@ -66,13 +87,18 @@ function figmaAssetResolver(): Plugin {
 }
 
 function htmlSiteUrlPlugin(siteUrl: string): Plugin {
-  const base = siteUrl.replace(/\/$/, '')
+  const absolute = siteUrl.replace(/\/$/, '')
   return {
     name: 'html-site-url',
-    transformIndexHtml(html: string) {
-      return html
-        .replaceAll('%VITE_SITE_URL%', base)
-        .replaceAll('%VITE_SITE_ORIGIN%', base)
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html: string) {
+        // Placeholder propio (no %VITE_*) para que Vite no lo reemplace con el env crudo
+        return html
+          .replaceAll('%APP_PUBLIC_URL%', absolute)
+          .replaceAll('%VITE_SITE_URL%', absolute)
+          .replaceAll('%VITE_SITE_ORIGIN%', absolute)
+      },
     },
   }
 }
@@ -104,8 +130,8 @@ export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const isBuild = command === 'build'
   const target = resolveDeployTarget(env)
-  const siteUrl = resolveSiteUrl(env, target, isBuild)
   const base = resolveBase(target, env)
+  const siteUrl = resolveSiteUrl(env, target, base, isBuild)
 
   if (isBuild) {
     console.log(`[vite] deploy=${target} base=${base} siteUrl=${siteUrl}`)

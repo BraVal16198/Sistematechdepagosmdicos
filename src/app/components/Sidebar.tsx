@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   UserPlus,
@@ -26,6 +27,19 @@ export function Sidebar({
   open = true,
   onClose,
 }: SidebarProps) {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
+  // En móvil cerrado: fuera del tab order; en desktop siempre accesible
+  const keyboardActive = isDesktop || open;
+
   const getMenuItems = () => {
     if (userRole === 'administrador') {
       return [
@@ -72,6 +86,9 @@ export function Sidebar({
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         aria-label="Navegación principal"
+        aria-hidden={!keyboardActive}
+        // @ts-expect-error React 18 types may omit inert
+        inert={!keyboardActive ? true : undefined}
       >
         <div className="p-6 border-b border-sidebar-border flex items-start justify-between gap-2">
           <div>
@@ -82,6 +99,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={onClose}
+              tabIndex={keyboardActive ? 0 : -1}
               className="lg:hidden p-2 rounded-lg hover:bg-sidebar-accent"
               aria-label="Cerrar menú"
             >
@@ -99,6 +117,7 @@ export function Sidebar({
                 key={item.id}
                 type="button"
                 onClick={() => handleNav(item.id)}
+                tabIndex={keyboardActive ? 0 : -1}
                 aria-current={isActive ? 'page' : undefined}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
                   isActive
@@ -117,6 +136,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onLogout}
+            tabIndex={keyboardActive ? 0 : -1}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground transition-colors"
           >
             <LogOut className="w-5 h-5" aria-hidden="true" />
