@@ -1,16 +1,45 @@
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { Login } from './components/Login';
 import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './components/Dashboard';
-import { RegistroPacientes } from './components/RegistroPacientes';
-import { GestionCitas } from './components/GestionCitas';
-import { HistorialClinico } from './components/HistorialClinico';
-import { PagosFacturacion } from './components/PagosFacturacion';
-import { PortalPaciente } from './components/PortalPaciente';
-import { PortalMedico } from './components/PortalMedico';
-import { HorarioEspecialidades } from './components/HorarioEspecialidades';
-import { CajaDia } from './components/CajaDia';
 import { ROLE_LABELS, type UserRole } from './lib/roles';
+
+const Dashboard = lazy(() =>
+  import('./components/Dashboard').then((m) => ({ default: m.Dashboard }))
+);
+const RegistroPacientes = lazy(() =>
+  import('./components/RegistroPacientes').then((m) => ({ default: m.RegistroPacientes }))
+);
+const GestionCitas = lazy(() =>
+  import('./components/GestionCitas').then((m) => ({ default: m.GestionCitas }))
+);
+const HistorialClinico = lazy(() =>
+  import('./components/HistorialClinico').then((m) => ({ default: m.HistorialClinico }))
+);
+const PagosFacturacion = lazy(() =>
+  import('./components/PagosFacturacion').then((m) => ({ default: m.PagosFacturacion }))
+);
+const PortalPaciente = lazy(() =>
+  import('./components/PortalPaciente').then((m) => ({ default: m.PortalPaciente }))
+);
+const PortalMedico = lazy(() =>
+  import('./components/PortalMedico').then((m) => ({ default: m.PortalMedico }))
+);
+const HorarioEspecialidades = lazy(() =>
+  import('./components/HorarioEspecialidades').then((m) => ({
+    default: m.HorarioEspecialidades,
+  }))
+);
+const CajaDia = lazy(() =>
+  import('./components/CajaDia').then((m) => ({ default: m.CajaDia }))
+);
+
+function ViewFallback() {
+  return (
+    <div className="p-6 text-muted-foreground text-sm" role="status">
+      Cargando vista…
+    </div>
+  );
+}
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,7 +92,9 @@ export default function App() {
             </button>
           </div>
         </header>
-        <PortalPaciente nombrePaciente={currentUser.username} />
+        <Suspense fallback={<ViewFallback />}>
+          <PortalPaciente nombrePaciente={currentUser.username} />
+        </Suspense>
       </div>
     );
   }
@@ -86,7 +117,9 @@ export default function App() {
             </button>
           </div>
         </header>
-        <PortalMedico nombreMedico={currentUser.username} especialidad="Medicina General" />
+        <Suspense fallback={<ViewFallback />}>
+          <PortalMedico nombreMedico={currentUser.username} especialidad="Medicina General" />
+        </Suspense>
       </div>
     );
   }
@@ -116,13 +149,17 @@ export default function App() {
         </header>
 
         <main id="contenido-principal" className="flex-1 overflow-y-auto">
-          {activeView === 'dashboard' && currentUser.role === 'administrador' && <Dashboard />}
-          {activeView === 'registro' && currentUser.role === 'administrador' && <RegistroPacientes />}
-          {activeView === 'citas' && <GestionCitas />}
-          {activeView === 'horarios' && <HorarioEspecialidades />}
-          {activeView === 'historial' && <HistorialClinico />}
-          {activeView === 'pagos' &&
-            (currentUser.role === 'administrativo' ? <CajaDia /> : <PagosFacturacion />)}
+          <Suspense fallback={<ViewFallback />}>
+            {activeView === 'dashboard' && currentUser.role === 'administrador' && <Dashboard />}
+            {activeView === 'registro' && currentUser.role === 'administrador' && (
+              <RegistroPacientes />
+            )}
+            {activeView === 'citas' && <GestionCitas />}
+            {activeView === 'horarios' && <HorarioEspecialidades />}
+            {activeView === 'historial' && <HistorialClinico />}
+            {activeView === 'pagos' &&
+              (currentUser.role === 'administrativo' ? <CajaDia /> : <PagosFacturacion />)}
+          </Suspense>
         </main>
       </div>
     </div>
