@@ -1,5 +1,0 @@
-# Plantilla: el build de Vite regenera este archivo con VITE_SITE_URL.
-User-agent: *
-Allow: /
-
-Sitemap: %VITE_SITE_URL%/sitemap.xml

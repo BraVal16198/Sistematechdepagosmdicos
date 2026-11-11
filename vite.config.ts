@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import path from 'path'
-import fs from 'fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
@@ -15,8 +14,12 @@ function resolveDeployTarget(env: Record<string, string>): DeployTarget {
   if (explicit === 'vercel') return 'vercel'
   if (explicit === 'netlify') return 'netlify'
 
-  if (env.VERCEL === '1' || env.VERCEL_ENV) return 'vercel'
-  if (env.NETLIFY === 'true' || env.NETLIFY) return 'netlify'
+  // Proveedores cloud: comparación estricta (evita falsos positivos locales)
+  if (env.VERCEL === '1') return 'vercel'
+  if (env.NETLIFY === 'true') return 'netlify'
+
+  // `other` explícito antes de inferir GH Pages por github.io en la URL
+  if (explicit === 'other') return 'other'
 
   const site = (env.VITE_SITE_URL || '').toLowerCase()
   if (site.includes('github.io')) return 'github-pages'
@@ -93,13 +96,6 @@ function seoStaticFilesPlugin(siteUrl: string): Plugin {
     generateBundle() {
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: robots })
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemap })
-    },
-    // Por si public/ aún copia plantillas: reescribe al cerrar el build
-    closeBundle() {
-      const outDir = path.resolve(__dirname, 'dist')
-      if (!fs.existsSync(outDir)) return
-      fs.writeFileSync(path.join(outDir, 'robots.txt'), robots)
-      fs.writeFileSync(path.join(outDir, 'sitemap.xml'), sitemap)
     },
   }
 }

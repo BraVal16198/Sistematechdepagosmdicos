@@ -66,7 +66,7 @@ Copia `.env.example` a `.env` si necesitas personalizar:
 
 | Variable | Descripción | Default / notas |
 | --- | --- | --- |
-| `VITE_DEPLOY_TARGET` | `github-pages` \| `vercel` \| `netlify` \| `other` | Detecta `VERCEL`/`NETLIFY` o `github.io` en la URL |
+| `VITE_DEPLOY_TARGET` | `github-pages` \| `vercel` \| `netlify` \| `other` | `github-pages`, `gh-pages`, `vercel` y `netlify` tienen prioridad si se definen; `other` se respeta antes de inferir GH Pages por `github.io` en la URL; si no hay valor explícito, detecta `VERCEL=1` / `NETLIFY=true` o `github.io` en `VITE_SITE_URL` |
 | `VITE_SITE_URL` | Origen público (canonical, OG, robots, sitemap) | Obligatorio en build **vercel/netlify**; en GitHub Pages usa el default `github.io` del repo |
 | `VITE_BASE_PATH` | Override del `base` de Vite | Auto: `/Sistematechdepagosmdicos/` (GH Pages) o `/` |
 | `VITE_APP_NAME` | Nombre visible del producto | Sistema Tech… |
