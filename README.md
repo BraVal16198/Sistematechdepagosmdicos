@@ -2,9 +2,9 @@
 
 Demo de portafolio (SPA) para clínicas: roles, citas, historial clínico, facturación y caja del día. **Todo el estado es mock en el navegador**; no hay backend, pasarela de pagos ni cumplimiento PCI/HIPAA.
 
-**Demo en vivo (objetivo Vercel):** [https://sistematech-pagos-medicos.vercel.app](https://sistematech-pagos-medicos.vercel.app)
+**Demo en vivo:** [https://braval16198.github.io/Sistematechdepagosmdicos/](https://braval16198.github.io/Sistematechdepagosmdicos/)
 
-> Si esa URL aún no responde, despliegue con el botón de Vercel o los pasos de la sección [Despliegue](#despliegue).
+> Despliegue actual: **GitHub Pages**. Alternativa Vercel: project name `sistematech-pagos-medicos`, build `vite build` con `VITE_BASE=/`, output `dist`.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FBraVal16198%2FSistematechdepagosmdicos&project-name=sistematech-pagos-medicos&repository-name=Sistematechdepagosmdicos)
 
@@ -14,7 +14,7 @@ Demo de portafolio (SPA) para clínicas: roles, citas, historial clínico, factu
 - Vite 6
 - Tailwind CSS 4
 - Lucide React + Recharts
-- Despliegue pensado para Vercel (`vercel.json`, salida `dist`)
+- GitHub Pages (base `/Sistematechdepagosmdicos/`) + `vercel.json` opcional
 
 ## Requisitos
 
@@ -31,7 +31,8 @@ npm run dev
 Otros scripts:
 
 ```bash
-npm run build      # build de producción → dist/
+npm run build      # build de producción → dist/ (base GitHub Pages por defecto)
+VITE_BASE=/ npm run build   # build para raíz (Vercel)
 npm run preview    # sirve dist/ en local
 npm run typecheck  # TypeScript sin emitir
 ```
@@ -41,7 +42,8 @@ npm run typecheck  # TypeScript sin emitir
 ```
 ├── index.html              # SEO, OG/Twitter, lang=es
 ├── public/                 # favicon, robots.txt, sitemap.xml, og-image
-├── vercel.json             # SPA rewrites + cabeceras de seguridad
+├── vercel.json             # SPA rewrites + cabeceras de seguridad (Vercel)
+├── .github/workflows/      # Deploy a GitHub Pages (rama gh-pages)
 ├── src/
 │   ├── main.tsx
 │   ├── app/
@@ -81,26 +83,25 @@ Los formularios de tarjeta muestran de forma explícita **DEMO — sin pagos rea
 
 ## Despliegue
 
-### Vercel (recomendado)
+### GitHub Pages (activo)
 
-1. Abra [vercel.com/new](https://vercel.com/new) e importe este repositorio.
+1. El workflow `Deploy GitHub Pages` publica `dist/` en la rama `gh-pages`.
+2. En el repo: **Settings → Pages → Branch `gh-pages` / (root)** si aún no está habilitado.
+3. URL: `https://braval16198.github.io/Sistematechdepagosmdicos/`
+
+### Vercel (opcional)
+
+1. Importe el repositorio en Vercel.
 2. **Project Name:** `sistematech-pagos-medicos`
-3. **Framework Preset:** Vite
-4. **Build Command:** `vite build` (o `npm run build`)
-5. **Output Directory:** `dist`
-6. Despliegue. La URL esperada es `https://sistematech-pagos-medicos.vercel.app`.
-
-El archivo `vercel.json` ya define rewrites SPA y cabeceras (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`).
+3. **Build Command:** `VITE_BASE=/ vite build` (o `VITE_BASE=/ npm run build`)
+4. **Output Directory:** `dist`
+5. URL esperada: `https://sistematech-pagos-medicos.vercel.app`
 
 CLI (si tiene token):
 
 ```bash
-npx vercel --token "$VERCEL_TOKEN" --yes --prod --name sistematech-pagos-medicos
+VITE_BASE=/ npx vercel --token "$VERCEL_TOKEN" --yes --prod --name sistematech-pagos-medicos
 ```
-
-### GitHub Pages (alternativa)
-
-Si Vercel no está disponible, puede publicar `dist/` con Actions o `gh-pages` tras `npm run build`. Configure la base de Vite si el sitio no vive en la raíz del dominio.
 
 ## Licencia
 

@@ -15,7 +15,11 @@ function figmaAssetResolver() {
   }
 }
 
+// Base for GitHub project Pages; override with VITE_BASE=/ for Vercel root deploys.
+const base = process.env.VITE_BASE || '/Sistematechdepagosmdicos/'
+
 export default defineConfig({
+  base,
   plugins: [figmaAssetResolver(), react(), tailwindcss()],
   resolve: {
     alias: {
@@ -23,6 +27,9 @@ export default defineConfig({
     },
   },
   assetsInclude: ['**/*.svg', '**/*.csv'],
+  preview: {
+    allowedHosts: true,
+  },
   build: {
     target: 'es2022',
     sourcemap: false,

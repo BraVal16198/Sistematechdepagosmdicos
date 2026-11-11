@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sistematech-pagos-medicos.vercel.app/sitemap.xml
+Sitemap: https://braval16198.github.io/Sistematechdepagosmdicos/sitemap.xml
