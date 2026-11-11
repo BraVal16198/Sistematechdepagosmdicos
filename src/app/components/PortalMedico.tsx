@@ -47,7 +47,7 @@ export function PortalMedico({ nombreMedico, especialidad }: { nombreMedico: str
 
   const pacientes = ['Juan Pérez', 'María López', 'Carlos Sánchez'];
 
-  const [historiales] = useState<Record<string, HistorialPaciente[]>>({
+  const [historiales, setHistoriales] = useState<Record<string, HistorialPaciente[]>>({
     'Juan Pérez': [
       {
         id: 1,
@@ -67,10 +67,25 @@ export function PortalMedico({ nombreMedico, especialidad }: { nombreMedico: str
       }
     ]
   });
+  const [mensaje, setMensaje] = useState('');
+  const [citas, setCitas] = useState(citasHoy);
 
   const handleSubmitHistorial = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Historial clínico guardado correctamente');
+    if (!pacienteSeleccionado) return;
+    const actuales = historiales[pacienteSeleccionado] || [];
+    const nueva: HistorialPaciente = {
+      id: actuales.length + 1,
+      fecha: new Date().toISOString().split('T')[0],
+      diagnostico: formHistorial.diagnostico,
+      tratamiento: formHistorial.tratamiento,
+      observaciones: formHistorial.observaciones,
+    };
+    setHistoriales({
+      ...historiales,
+      [pacienteSeleccionado]: [nueva, ...actuales],
+    });
+    setMensaje('Consulta añadida al historial demo (solo en memoria).');
     setFormHistorial({
       diagnostico: '',
       tratamiento: '',
@@ -79,11 +94,31 @@ export function PortalMedico({ nombreMedico, especialidad }: { nombreMedico: str
     setMostrarFormulario(false);
   };
 
+  const atenderCita = (id: number) => {
+    setCitas((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, estado: 'en-atencion' } : c))
+    );
+    const cita = citas.find((c) => c.id === id);
+    if (cita) {
+      setPacienteSeleccionado(cita.paciente);
+      setVistaActiva('historial');
+      setMostrarFormulario(true);
+      setMensaje(`Atención iniciada para ${cita.paciente}.`);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h2 className="text-2xl text-foreground mb-2">Portal Médico</h2>
-        <p className="text-muted-foreground">{nombreMedico} - {especialidad}</p>
+        <h2 className="text-2xl text-foreground mb-2">Portal médico</h2>
+        <p className="text-muted-foreground">
+          {nombreMedico} — {especialidad} (datos mock)
+        </p>
+        {mensaje && (
+          <p role="status" className="mt-2 text-sm text-teal-800 bg-teal-50 border border-teal-200 rounded-lg px-3 py-2">
+            {mensaje}
+          </p>
+        )}
       </div>
 
       <div className="flex gap-4 border-b border-border">
@@ -119,7 +154,7 @@ export function PortalMedico({ nombreMedico, especialidad }: { nombreMedico: str
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {citasHoy.map((cita) => (
+            {citas.map((cita) => (
               <div key={cita.id} className="bg-card border border-border rounded-lg p-6 shadow">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -129,24 +164,34 @@ export function PortalMedico({ nombreMedico, especialidad }: { nombreMedico: str
                       {cita.hora}
                     </div>
                   </div>
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                    Pendiente
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      cita.estado === 'en-atencion'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
+                    {cita.estado === 'en-atencion' ? 'En atención' : 'Pendiente'}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground mb-4">
                   <p>Motivo: {cita.motivo}</p>
                 </div>
-                <button className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
-                  Atender Paciente
+                <button
+                  type="button"
+                  onClick={() => atenderCita(cita.id)}
+                  className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Atender paciente
                 </button>
               </div>
             ))}
           </div>
 
-          {citasHoy.length === 0 && (
+          {citas.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p>No tienes citas programadas para hoy</p>
+              <p>No tiene citas programadas para hoy en la demo.</p>
             </div>
           )}
         </div>

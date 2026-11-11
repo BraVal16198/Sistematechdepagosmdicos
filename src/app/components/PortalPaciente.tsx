@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Calendar, FileText, CreditCard, Download, Clock } from 'lucide-react';
+import { Calendar, FileText, Download, Clock } from 'lucide-react';
+import { DemoPciNotice } from './DemoPciNotice';
+import { downloadTextFile } from '../lib/download';
 
 interface CitaPaciente {
   id: number;
@@ -142,18 +144,32 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
   };
 
   const descargarPDFHistorial = () => {
-    alert('Descargando PDF de Historial Clínico...');
+    const cuerpo = historial
+      .map(
+        (c) =>
+          `Fecha: ${c.fecha}\nMédico: ${c.medico}\nDiagnóstico: ${c.diagnostico}\nTratamiento: ${c.tratamiento}\n---`
+      )
+      .join('\n');
+    downloadTextFile(
+      `historial-${nombrePaciente}.txt`,
+      `Historial clínico DEMO\nPaciente: ${nombrePaciente}\n\n${cuerpo || 'Sin consultas.'}\n`
+    );
   };
 
   const descargarPDFPago = (cita: CitaPaciente) => {
-    alert(`Descargando comprobante de pago - Cita ID: ${cita.id}`);
+    downloadTextFile(
+      `comprobante-cita-${cita.id}.txt`,
+      `Comprobante DEMO\nCita: ${cita.id}\nMédico: ${cita.medico}\nServicio: ${cita.especialidad}\nMonto: S/ ${cita.monto}\nMétodo: ${cita.metodoPago}\n`
+    );
   };
 
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h2 className="text-2xl text-foreground mb-2">Portal del Paciente</h2>
-        <p className="text-muted-foreground">Bienvenido, {nombrePaciente}</p>
+        <h2 className="text-2xl text-foreground mb-2">Portal del paciente</h2>
+        <p className="text-muted-foreground">
+          Bienvenido/a, {nombrePaciente}. Vista demo con datos simulados.
+        </p>
       </div>
 
       <div className="flex gap-4 border-b border-border">
@@ -203,6 +219,11 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {misCitas.length === 0 && (
+              <p className="text-muted-foreground text-sm md:col-span-2 py-8 text-center">
+                Aún no tiene citas. Agende una para probar el flujo de pago demo.
+              </p>
+            )}
             {misCitas.map((cita) => (
               <div key={cita.id} className="bg-card border border-border rounded-lg p-6 shadow">
                 <div className="flex items-start justify-between mb-4">
@@ -253,18 +274,24 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
 
       {vistaActiva === 'historial' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg text-card-foreground">Mi Historial Clínico</h3>
+          <div className="flex justify-between items-center gap-4 flex-wrap">
+            <h3 className="text-lg text-card-foreground">Mi historial clínico</h3>
             <button
+              type="button"
               onClick={descargarPDFHistorial}
               className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
             >
               <Download className="w-5 h-5" />
-              Descargar Historial PDF
+              Descargar historial (TXT demo)
             </button>
           </div>
 
           <div className="space-y-4">
+            {historial.length === 0 && (
+              <p className="text-muted-foreground text-sm py-8 text-center">
+                No hay consultas en el historial de demostración.
+              </p>
+            )}
             {historial.map((consulta) => (
               <div key={consulta.id} className="bg-card border border-border rounded-lg p-6 shadow">
                 <div className="flex items-center justify-between mb-4">
@@ -298,40 +325,49 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
 
       {vistaActiva === 'pagos' && (
         <div className="space-y-6">
-          <h3 className="text-lg text-card-foreground">Mis Pagos</h3>
+          <h3 className="text-lg text-card-foreground">Mis pagos</h3>
           <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="text-left py-3 px-4 text-muted-foreground">Fecha</th>
-                  <th className="text-left py-3 px-4 text-muted-foreground">Servicio</th>
-                  <th className="text-left py-3 px-4 text-muted-foreground">Método</th>
-                  <th className="text-left py-3 px-4 text-muted-foreground">Monto</th>
-                  <th className="text-left py-3 px-4 text-muted-foreground">PDF</th>
-                </tr>
-              </thead>
-              <tbody>
-                {misCitas.filter(c => c.estado === 'completada').map((cita) => (
-                  <tr key={cita.id} className="border-b border-border">
-                    <td className="py-3 px-4 text-card-foreground">
-                      {new Date(cita.fecha).toLocaleDateString('es-ES')}
-                    </td>
-                    <td className="py-3 px-4 text-card-foreground">{cita.especialidad}</td>
-                    <td className="py-3 px-4 text-card-foreground">{cita.metodoPago}</td>
-                    <td className="py-3 px-4 text-card-foreground">S/ {cita.monto}</td>
-                    <td className="py-3 px-4">
-                      <button
-                        onClick={() => descargarPDFPago(cita)}
-                        className="text-primary hover:underline flex items-center gap-1"
-                      >
-                        <Download className="w-4 h-4" />
-                        Descargar
-                      </button>
-                    </td>
+            {misCitas.filter((c) => c.estado === 'completada').length === 0 ? (
+              <p className="text-muted-foreground text-sm py-8 text-center px-4">
+                No hay pagos completados en la demo. Las citas finalizadas aparecerán aquí.
+              </p>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left py-3 px-4 text-muted-foreground">Fecha</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground">Servicio</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground">Método</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground">Monto</th>
+                    <th className="text-left py-3 px-4 text-muted-foreground">Comprobante</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {misCitas
+                    .filter((c) => c.estado === 'completada')
+                    .map((cita) => (
+                      <tr key={cita.id} className="border-b border-border">
+                        <td className="py-3 px-4 text-card-foreground">
+                          {new Date(cita.fecha).toLocaleDateString('es-ES')}
+                        </td>
+                        <td className="py-3 px-4 text-card-foreground">{cita.especialidad}</td>
+                        <td className="py-3 px-4 text-card-foreground">{cita.metodoPago}</td>
+                        <td className="py-3 px-4 text-card-foreground">S/ {cita.monto}</td>
+                        <td className="py-3 px-4">
+                          <button
+                            type="button"
+                            onClick={() => descargarPDFPago(cita)}
+                            className="text-primary hover:underline flex items-center gap-1"
+                          >
+                            <Download className="w-4 h-4" />
+                            Descargar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
@@ -428,8 +464,18 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
 
       {mostrarPago && citaSeleccionada && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full border border-border">
-            <h3 className="text-lg mb-4 text-card-foreground">Procesar Pago Online</h3>
+          <div
+            className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full border border-border"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pago-paciente-titulo"
+          >
+            <h3 id="pago-paciente-titulo" className="text-lg mb-4 text-card-foreground">
+              Procesar pago online (DEMO)
+            </h3>
+            <div className="mb-4">
+              <DemoPciNotice />
+            </div>
             <div className="mb-4 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">Médico: {citaSeleccionada.medico}</p>
               <p className="text-sm text-muted-foreground">Especialidad: {citaSeleccionada.especialidad}</p>
@@ -440,21 +486,30 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
               {formCita.metodoPago === 'tarjeta' && (
                 <>
                   <div>
-                    <label className="block text-sm mb-2 text-card-foreground">Número de Tarjeta</label>
+                    <label htmlFor="pac-numero-tarjeta" className="block text-sm mb-2 text-card-foreground">
+                      Número de tarjeta (DEMO — no PCI)
+                    </label>
                     <input
+                      id="pac-numero-tarjeta"
                       type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
                       value={pagoData.numeroTarjeta}
                       onChange={(e) => setPagoData({ ...pagoData, numeroTarjeta: e.target.value })}
-                      placeholder="1234 5678 9012 3456"
+                      placeholder="ACCT-000035"
                       className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm mb-2 text-card-foreground">Nombre del Titular</label>
+                    <label htmlFor="pac-nombre-titular" className="block text-sm mb-2 text-card-foreground">
+                      Nombre del titular (DEMO)
+                    </label>
                     <input
+                      id="pac-nombre-titular"
                       type="text"
+                      autoComplete="off"
                       value={pagoData.nombreTitular}
                       onChange={(e) => setPagoData({ ...pagoData, nombreTitular: e.target.value })}
                       className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
@@ -464,9 +519,13 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm mb-2 text-card-foreground">Vencimiento</label>
+                      <label htmlFor="pac-vencimiento" className="block text-sm mb-2 text-card-foreground">
+                        Vencimiento (DEMO)
+                      </label>
                       <input
+                        id="pac-vencimiento"
                         type="text"
+                        autoComplete="off"
                         value={pagoData.fechaVencimiento}
                         onChange={(e) => setPagoData({ ...pagoData, fechaVencimiento: e.target.value })}
                         placeholder="MM/AA"
@@ -475,9 +534,14 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-card-foreground">CVV</label>
+                      <label htmlFor="pac-cvv" className="block text-sm mb-2 text-card-foreground">
+                        CVV (DEMO)
+                      </label>
                       <input
-                        type="text"
+                        id="pac-cvv"
+                        type="password"
+                        inputMode="numeric"
+                        autoComplete="off"
                         value={pagoData.cvv}
                         onChange={(e) => setPagoData({ ...pagoData, cvv: e.target.value })}
                         placeholder="123"
@@ -491,15 +555,19 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
 
               {formCita.metodoPago === 'billetera' && (
                 <div>
-                  <label className="block text-sm mb-2 text-card-foreground">Número de Celular</label>
+                  <label htmlFor="pac-celular" className="block text-sm mb-2 text-card-foreground">
+                    Número de celular (DEMO)
+                  </label>
                   <input
+                    id="pac-celular"
                     type="tel"
+                    autoComplete="off"
                     placeholder="999 999 999"
                     className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     required
                   />
                   <p className="text-xs text-muted-foreground mt-2">
-                    Se enviará una solicitud de pago a tu Yape/Plin
+                    Simulación de solicitud Yape/Plin. No se envía ningún cobro real.
                   </p>
                 </div>
               )}
@@ -509,7 +577,7 @@ export function PortalPaciente({ nombrePaciente }: { nombrePaciente: string }) {
                   type="submit"
                   className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  Confirmar Pago S/ {citaSeleccionada.monto}
+                  Confirmar pago demo S/ {citaSeleccionada.monto}
                 </button>
                 <button
                   type="button"

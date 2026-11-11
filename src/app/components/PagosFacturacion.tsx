@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { CreditCard, FileText, Download, DollarSign, Check } from 'lucide-react';
+import { DemoPciNotice } from './DemoPciNotice';
+import { downloadTextFile } from '../lib/download';
 
 interface Factura {
   id: number;
@@ -124,10 +126,12 @@ export function PagosFacturacion() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Pagos y Facturación</h2>
-          <p className="text-muted-foreground">Gestión de cobros y emisión de comprobantes</p>
+          <h2 className="text-2xl text-foreground mb-2">Pagos y facturación</h2>
+          <p className="text-muted-foreground">
+            Gestión de cobros y emisión de comprobantes (datos mock en memoria)
+          </p>
         </div>
         <button
           onClick={() => setMostrarFormulario(!mostrarFormulario)}
@@ -254,8 +258,11 @@ export function PagosFacturacion() {
 
       {mostrarPago && facturaSeleccionada && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-border">
-            <h3 className="text-lg mb-4 text-card-foreground">Procesar Pago</h3>
+          <div className="bg-card rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-border" role="dialog" aria-modal="true" aria-labelledby="pago-titulo">
+            <h3 id="pago-titulo" className="text-lg mb-4 text-card-foreground">Procesar pago</h3>
+            <div className="mb-4">
+              <DemoPciNotice />
+            </div>
             <div className="mb-4 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">Factura: {facturaSeleccionada.numero}</p>
               <p className="text-sm text-muted-foreground">Paciente: {facturaSeleccionada.paciente}</p>
@@ -264,35 +271,45 @@ export function PagosFacturacion() {
 
             <form onSubmit={handleSubmitPago} className="space-y-4">
               <div>
-                <label className="block text-sm mb-2 text-card-foreground">Método de Pago</label>
+                <label htmlFor="metodo-pago" className="block text-sm mb-2 text-card-foreground">Método de pago</label>
                 <select
+                  id="metodo-pago"
                   value={pagoData.metodoPago}
                   onChange={(e) => setPagoData({ ...pagoData, metodoPago: e.target.value })}
                   className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="tarjeta">Tarjeta de Crédito/Débito</option>
-                  <option value="efectivo">Efectivo</option>
+                  <option value="tarjeta">Tarjeta de crédito/débito (DEMO)</option>
+                  <option value="efectivo">Efectivo (DEMO)</option>
                 </select>
               </div>
 
               {pagoData.metodoPago === 'tarjeta' && (
                 <>
                   <div>
-                    <label className="block text-sm mb-2 text-card-foreground">Número de Tarjeta</label>
+                    <label htmlFor="numero-tarjeta" className="block text-sm mb-2 text-card-foreground">
+                      Número de tarjeta (DEMO — no PCI)
+                    </label>
                     <input
+                      id="numero-tarjeta"
                       type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
                       value={pagoData.numeroTarjeta}
                       onChange={(e) => setPagoData({ ...pagoData, numeroTarjeta: e.target.value })}
-                      placeholder="1234 5678 9012 3456"
+                      placeholder="ACCT-000035"
                       className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm mb-2 text-card-foreground">Nombre del Titular</label>
+                    <label htmlFor="nombre-titular" className="block text-sm mb-2 text-card-foreground">
+                      Nombre del titular (DEMO)
+                    </label>
                     <input
+                      id="nombre-titular"
                       type="text"
+                      autoComplete="off"
                       value={pagoData.nombreTitular}
                       onChange={(e) => setPagoData({ ...pagoData, nombreTitular: e.target.value })}
                       className="w-full px-4 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
@@ -302,9 +319,13 @@ export function PagosFacturacion() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm mb-2 text-card-foreground">Vencimiento</label>
+                      <label htmlFor="vencimiento" className="block text-sm mb-2 text-card-foreground">
+                        Vencimiento (DEMO)
+                      </label>
                       <input
+                        id="vencimiento"
                         type="text"
+                        autoComplete="off"
                         value={pagoData.fechaVencimiento}
                         onChange={(e) => setPagoData({ ...pagoData, fechaVencimiento: e.target.value })}
                         placeholder="MM/AA"
@@ -313,9 +334,14 @@ export function PagosFacturacion() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-card-foreground">CVV</label>
+                      <label htmlFor="cvv" className="block text-sm mb-2 text-card-foreground">
+                        CVV (DEMO)
+                      </label>
                       <input
-                        type="text"
+                        id="cvv"
+                        type="password"
+                        inputMode="numeric"
+                        autoComplete="off"
                         value={pagoData.cvv}
                         onChange={(e) => setPagoData({ ...pagoData, cvv: e.target.value })}
                         placeholder="123"
@@ -333,7 +359,7 @@ export function PagosFacturacion() {
                   className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   <Check className="w-5 h-5" />
-                  Confirmar Pago
+                  Confirmar pago demo
                 </button>
                 <button
                   type="button"
@@ -352,63 +378,83 @@ export function PagosFacturacion() {
       )}
 
       <div className="bg-card rounded-lg shadow p-6 border border-border">
-        <h3 className="text-lg mb-4 text-card-foreground">Facturas Recientes</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-muted-foreground">Número</th>
-                <th className="text-left py-3 px-4 text-muted-foreground">Paciente</th>
-                <th className="text-left py-3 px-4 text-muted-foreground">Servicio</th>
-                <th className="text-left py-3 px-4 text-muted-foreground">Monto</th>
-                <th className="text-left py-3 px-4 text-muted-foreground">Fecha</th>
-                <th className="text-left py-3 px-4 text-muted-foreground">Estado</th>
-                <th className="text-left py-3 px-4 text-muted-foreground">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {facturas.map((factura) => (
-                <tr key={factura.id} className="border-b border-border hover:bg-muted/50">
-                  <td className="py-3 px-4 text-card-foreground">{factura.numero}</td>
-                  <td className="py-3 px-4 text-card-foreground">{factura.paciente}</td>
-                  <td className="py-3 px-4 text-card-foreground">{factura.servicio}</td>
-                  <td className="py-3 px-4 text-card-foreground">S/ {factura.monto.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-card-foreground">
-                    {new Date(factura.fecha).toLocaleDateString('es-ES')}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-sm ${
-                      factura.estado === 'pagada' ? 'bg-green-100 text-green-800' :
-                      factura.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {factura.estado.charAt(0).toUpperCase() + factura.estado.slice(1)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex gap-2">
-                      {factura.estado === 'pendiente' && (
-                        <button
-                          onClick={() => iniciarPago(factura)}
-                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                          title="Procesar Pago"
-                        >
-                          <CreditCard className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button
-                        className="p-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
-                        title="Descargar"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        <h3 className="text-lg mb-4 text-card-foreground">Facturas recientes</h3>
+        {facturas.length === 0 ? (
+          <p className="text-muted-foreground text-sm py-8 text-center">
+            No hay facturas registradas. Genere una factura para comenzar la demo.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-4 text-muted-foreground">Número</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">Paciente</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">Servicio</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">Monto</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">Fecha</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">Estado</th>
+                  <th className="text-left py-3 px-4 text-muted-foreground">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {facturas.map((factura) => (
+                  <tr key={factura.id} className="border-b border-border hover:bg-muted/50">
+                    <td className="py-3 px-4 text-card-foreground">{factura.numero}</td>
+                    <td className="py-3 px-4 text-card-foreground">{factura.paciente}</td>
+                    <td className="py-3 px-4 text-card-foreground">{factura.servicio}</td>
+                    <td className="py-3 px-4 text-card-foreground">S/ {factura.monto.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-card-foreground">
+                      {new Date(factura.fecha).toLocaleDateString('es-ES')}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`px-2 py-1 rounded text-sm ${
+                          factura.estado === 'pagada'
+                            ? 'bg-green-100 text-green-800'
+                            : factura.estado === 'pendiente'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {factura.estado.charAt(0).toUpperCase() + factura.estado.slice(1)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex gap-2">
+                        {factura.estado === 'pendiente' && (
+                          <button
+                            type="button"
+                            onClick={() => iniciarPago(factura)}
+                            className="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                            title="Procesar pago"
+                            aria-label={`Procesar pago de ${factura.numero}`}
+                          >
+                            <CreditCard className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="p-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+                          title="Descargar comprobante demo"
+                          aria-label={`Descargar comprobante ${factura.numero}`}
+                          onClick={() =>
+                            downloadTextFile(
+                              `${factura.numero}.txt`,
+                              `Comprobante DEMO\nFactura: ${factura.numero}\nPaciente: ${factura.paciente}\nServicio: ${factura.servicio}\nMonto: S/ ${factura.monto.toFixed(2)}\nEstado: ${factura.estado}\n`
+                            )
+                          }
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
