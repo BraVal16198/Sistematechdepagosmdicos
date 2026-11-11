@@ -1,0 +1,5 @@
+Contact: https://github.com/BraVal16198/Sistematechdepagosmdicos/issues
+Preferred-Languages: es, en
+Canonical: https://braval16198.github.io/Sistematechdepagosmdicos/.well-known/security.txt
+Policy: https://github.com/BraVal16198/Sistematechdepagosmdicos/blob/main/README.md
+Expires: 2027-11-11T00:00:00.000Z

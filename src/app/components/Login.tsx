@@ -48,7 +48,7 @@ export function Login({ onLogin }: LoginProps) {
             <h1 className="text-2xl text-card-foreground mb-2">
               Pagos y Gestión Médica
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm" id="aviso-demo">
               Demo de portafolio con datos simulados. No procesa cobros reales.
             </p>
           </header>
@@ -113,7 +113,11 @@ export function Login({ onLogin }: LoginProps) {
             </button>
           </form>
 
-          <section className="mt-6 rounded-lg bg-muted/60 p-4" aria-labelledby="demo-accounts-title">
+          <section
+            id="demo-cuentas"
+            className="mt-6 rounded-lg bg-muted/60 p-4"
+            aria-labelledby="demo-accounts-title"
+          >
             <h2 id="demo-accounts-title" className="text-sm font-medium text-card-foreground mb-2">
               Cuentas demo
             </h2>

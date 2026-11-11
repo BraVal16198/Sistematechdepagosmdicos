@@ -10,6 +10,7 @@
     />
     <meta name="theme-color" content="#0f766e" />
     <meta name="robots" content="index, follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="canonical" href="https://braval16198.github.io/Sistematechdepagosmdicos/" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="apple-touch-icon" href="./favicon.svg" />
@@ -39,6 +40,32 @@
       content="https://braval16198.github.io/Sistematechdepagosmdicos/og-image.svg"
     />
 
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Sistema Tech — Pagos y Gestión Médica",
+        "alternateName": "Sistema Tech",
+        "url": "https://braval16198.github.io/Sistematechdepagosmdicos/",
+        "description": "Demo de portafolio de un sistema web para gestión clínica, citas, historial y pagos médicos con datos simulados. No procesa cobros reales ni cumple PCI.",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "es",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "BraVal16198",
+          "url": "https://github.com/BraVal16198"
+        },
+        "screenshot": "https://braval16198.github.io/Sistematechdepagosmdicos/og-image.svg"
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -55,9 +82,73 @@
       #root {
         height: 100%;
       }
+      /* Contenido estático para crawlers; oculto a usuarios (Login React aporta el H1 visible). */
+      #seo-bootstrap {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
     </style>
   </head>
+
   <body>
+    <div id="seo-bootstrap" aria-hidden="true">
+      <header>
+        <p>Sistema Tech</p>
+        <h1>Pagos y Gestión Médica</h1>
+      </header>
+      <p>
+        Sistema Tech es una demostración de portafolio de un sistema web para clínicas:
+        gestión de pacientes, citas, historial clínico, facturación y caja del día con datos
+        simulados. No procesa cobros reales ni almacena información sanitaria en un servidor.
+      </p>
+      <nav aria-label="Enlaces del sitio">
+        <ul>
+          <li>
+            <a href="#demo-cuentas">Cuentas demo</a>
+          </li>
+          <li>
+            <a href="#aviso-demo">Aviso de privacidad (demo)</a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/BraVal16198/Sistematechdepagosmdicos/blob/main/README.md"
+              >Documentación del proyecto (README)</a
+            >
+          </li>
+          <li>
+            <a href="./robots.txt">robots.txt</a>
+          </li>
+          <li>
+            <a href="./sitemap.xml">sitemap.xml</a>
+          </li>
+          <li>
+            <a href="./.well-known/security.txt">security.txt</a>
+          </li>
+        </ul>
+      </nav>
+      <section id="demo-cuentas">
+        <h2>Cuentas demo</h2>
+        <p>
+          administrador/admin · admin/admin · medico/medico · paciente/paciente. El rol se
+          asigna según la cuenta.
+        </p>
+      </section>
+      <section id="aviso-demo">
+        <h2>Aviso de privacidad (demo)</h2>
+        <p>
+          Esta aplicación es solo demostrativa: los datos no se envían a un backend ni a una
+          pasarela de pagos. No use información personal real ni datos de tarjetas verdaderos.
+        </p>
+      </section>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
