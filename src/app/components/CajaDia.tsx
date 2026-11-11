@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Download, DollarSign, CreditCard, Wallet } from 'lucide-react';
+import { downloadTextFile } from '../lib/download';
 
 interface PagoDelDia {
   id: number;
@@ -66,20 +68,38 @@ export function CajaDia() {
 
   const totalGeneral = totalEfectivo + totalTarjeta + totalBilletera;
 
+  const [mensaje, setMensaje] = useState('');
+
   const cerrarCaja = () => {
-    alert(`Caja cerrada. Total del día: S/ ${totalGeneral.toFixed(2)}`);
+    setMensaje(`Caja cerrada (demo). Total del día: S/ ${totalGeneral.toFixed(2)}`);
   };
 
   const descargarReporte = () => {
-    alert('Descargando reporte de caja del día...');
+    const filas = pagosDelDia
+      .map(
+        (p) =>
+          `${p.hora} | ${p.paciente} | ${p.servicio} | ${p.metodoPago} | S/ ${p.monto.toFixed(2)}`
+      )
+      .join('\n');
+    downloadTextFile(
+      'caja-del-dia.csv',
+      `hora,paciente,servicio,metodo,monto\n${pagosDelDia
+        .map((p) => `${p.hora},${p.paciente},${p.servicio},${p.metodoPago},${p.monto}`)
+        .join('\n')}\n\n# Total: S/ ${totalGeneral.toFixed(2)}\n# ${filas}\n`,
+      'text/csv;charset=utf-8'
+    );
+    setMensaje('Reporte CSV demo descargado.');
   };
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl text-foreground mb-2">Caja del Día</h2>
+          <h2 className="text-2xl text-foreground mb-2">Caja del día</h2>
           <p className="text-muted-foreground capitalize">{fechaHoy}</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Vista administrativa con movimientos mock (sin backend).
+          </p>
         </div>
         <div className="flex gap-3">
           <button
@@ -97,6 +117,15 @@ export function CajaDia() {
           </button>
         </div>
       </div>
+
+      {mensaje && (
+        <p
+          role="status"
+          className="text-sm text-teal-800 bg-teal-50 border border-teal-200 rounded-lg px-3 py-2"
+        >
+          {mensaje}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow p-6 text-white">

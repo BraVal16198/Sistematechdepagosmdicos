@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sistematech-pagos-medicos.vercel.app/sitemap.xml
